@@ -68,6 +68,8 @@ void analyzer::Loop(){
 	CutList.push_back("Lepton SF");
 	CutList.push_back("TauFakeRate");
 	CutList.push_back("topPtRwgt");
+	CutList.push_back("TTJets norm");
+	CutList.push_back("WJets norm");
 	//CutList.push_back("Cleaned jets");
 	CutList.push_back("Jets lt 1 and 0btag");
 	CutList.push_back("MT window");
@@ -212,8 +214,8 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 //		cout<<" e " <<jentry<<" from "<<nentries<<"  weights "<<all_weights<<" same ? "<< gen_weight*trig_weight*pu_weight*top_weight*LSF_weight*TFR_weight <<" PU "<<pu_weight<<" top "<<top_weight<<" LSF "<<LSF_weight<<" TFR "<<TFR_weight<<" gen "<<gen_weight<<" trig  "<<trig_weight<<endl;
 		int iCut = 2;
 		
-		if (mu_relIso[0] > 0.1 && !InvertLeptonIso) continue;
-		if (mu_relIso[0] < 0.1 && InvertLeptonIso) continue;
+		if (mu_relIso[0] > 0.15 && !InvertLeptonIso) continue;
+		if (mu_relIso[0] < 0.15 && InvertLeptonIso) continue;
 		//if ( fabs(mu_dxy[muon_index]) > 0.01) continue;
 		//if ( fabs(mu_dz[muon_index]) > 0.01) continue;
 
@@ -290,6 +292,17 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
                 iCFCounter[iCut]++;
 		iCut++;
 
+		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
+
+		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
 		//ta_relIso[0] the tau Iso
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -388,51 +401,6 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 
 
 
-		if (MT  < 250. ) continue;
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-		
-		 TLorentzVector DiLL = MuV  + TauV;
-		if (DiLL.M()<250.) continue;
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-
-
-		
-
-	
-/*		double HText =sumpT;
-    	        HText += mu_pt[muon_index];
-		double RhT = mu_pt[muon_index]/HText;
-                double PtOHT =  mu_pt[muon_index]/sumpT;
-		double HTOMET  = sumpT/sqrt(METV.Pt());
-		//cout<<" RHT "<< RhT<<endl;
-		
-		if (  fabs(mu_dxy[muon_index])> 0.02) continue;
-		if (  fabs(mu_dz[muon_index])> 0.02) continue;
-		if (met <100) continue;
-		//if (PtOHT<2.) continue;
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-		
-		
-		if (HTOMET > 10.)continue;		
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-*/
-
 		
 
 
@@ -442,7 +410,7 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 
 
 
-	float Lumi = 2320.;
+	float Lumi = 6260.;
 
 	if (isData) Lumi = 1;
 
@@ -456,7 +424,7 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
  					CutFlowUnW->SetBinContent(1+ci,float(CFCounter[ci]) );
 				
 
-					cout<<" Count "<<ci<<" binContent "<<CutFlow->GetBinContent(1+ci)<<"  CFCounter_ "<<CFCounter_[ci]<<" CFCounter "<<CFCounter[ci]<<" iCFCounter "<<iCFCounter[ci]<<" Name "<<CutFlowUnW->GetXaxis()->GetBinLabel(1+ci)<<" entry  "<<CutFlowUnW->GetBinContent(1+ci)<<" for Lumi " <<Lumi<<"  "<<float (CutFlowUnW->GetBinContent(1+ci))*hxsecW->GetMean()*Lumi/histW->GetSumOfWeights()<<endl;			
+					cout<<" Count "<<ci<<" binContent "<<CutFlowUnW->GetBinContent(1+ci)<<"  CFCounter_ "<<CFCounter_[ci]<<" CFCounter "<<CFCounter[ci]<<" iCFCounter "<<iCFCounter[ci]<<" Name "<<CutFlowUnW->GetXaxis()->GetBinLabel(1+ci)<<" entry  "<<CutFlowUnW->GetBinContent(1+ci)<<" prediction for Lumi " <<Lumi<<"  "<<float (CutFlowUnW->GetBinContent(1+ci))*hxsecW->GetMean()*Lumi/histW->GetSumOfWeights()<<endl;			
 
 }
 

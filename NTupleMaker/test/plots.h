@@ -101,9 +101,8 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 		if (pt>60 )	    SF = 1.25883;
 	}
 }
-*/
 
-
+///////76x
 if (sel =="mutau" || sel == "eltau"){
 
 if (  fabs(eta) < 0.9 ) 
@@ -132,7 +131,31 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 	}
 }
 
+*/
+if (sel =="mutau" || sel == "eltau"){
 
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 0.372714;
+		if (pt>30 && pt<50) SF = 0.485751;
+		if (pt>50 ) SF = 0.835454;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.448388;
+		if (pt>30 && pt<50) SF = 0.832162;
+		if (pt>50 ) SF = 2.54091;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.409646;
+		if (pt>30 && pt<50) SF = 0.520366;
+		if (pt>60) SF = 0.725716;
+	}
+}
 
 return SF;
 
@@ -244,6 +267,8 @@ vector<string> CutList;
 TH1D * histRuns = new TH1D("histRuns","",6000,24000,30000);
 
 TH1D * histWeightsH = new TH1D("histWeightsH","",1,-0.5,0.5);
+
+TH1D * histTopPt = new TH1D("histTopPt","",1,-0.5,0.5);
 
 TH1D * hWeights [CutN];
 

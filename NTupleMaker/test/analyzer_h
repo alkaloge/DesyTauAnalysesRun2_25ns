@@ -239,6 +239,11 @@ class analyzer {
 		virtual Bool_t   Notify();
 		virtual void     Show(Long64_t entry = -1);
 
+		void TopHist(Double_t EvWeight){
+
+		histTopPt->Fill(0.,EvWeight);
+		}
+
 		void FillHists(int CutIndex, Double_t EvWeight, TLorentzVector  elV, TLorentzVector  muV, TLorentzVector tauV, vector<TLorentzVector>  &JetsV, TLorentzVector  &MetV, double Chimass, double mintermediate, string & Sel, int  mIndex, int eIndex, int  tIndex){
 
 			AllJets_Lepton_noMet.clear();

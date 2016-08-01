@@ -404,8 +404,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   int selEventsAllMuons = 0;
   int selEventsIdMuons = 0;
   int selEventsIsoMuons = 0;
+  bool CutBasedTauId = false;
   bool lumi=false;
-  bool sel_74 = false;
   bool isLowIsoMu=false;
   bool isHighIsoMu = false;
   bool isLowIsoTau=false;
@@ -469,14 +469,17 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
       //histWeightsH->Fill(0.,genweight);
     }
 
+
     TTree * _tree = NULL;
     _tree = (TTree*)file_->Get(TString(ntupleName));
+
     if (_tree==NULL) continue;
     Long64_t numberOfEntries = _tree->GetEntries();
     std::cout << "      number of entries in Tree      = " << numberOfEntries << std::endl;
     AC1B analysisTree(_tree);
 
 	if (!isData && !WithInit)
+	//if (!isData)
 		{    
 		for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) 
 			{
@@ -489,8 +492,11 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
 			histWeightsH->Fill(0.,analysisTree.genweight);
 			}
 		}
+  	float genweights=1;
 
-    float genweights=1;
+	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
+	genweightsTree->SetBranchAddress("genweight",&genweights);
+
     if(!isData && WithInit) 
       {
 
@@ -585,7 +591,9 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       pu_weight = 1.;
       gen_weight = 1.;
       trig_weight = 1.;
-      if(!isData) 
+	  
+
+      if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
 	{
 	  for (unsigned int igen=0; igen<analysisTree.genparticles_count; ++igen) {
 	    // 		cout<< "  info = " <<  int(analysisTree.genparticles_count) <<"  "<<int(analysisTree.genparticles_pdgid[igen])<<endl;
@@ -597,18 +605,28 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	      antitopPt = TMath::Sqrt(analysisTree.genparticles_px[igen]*analysisTree.genparticles_px[igen]+
 				      analysisTree.genparticles_py[igen]*analysisTree.genparticles_py[igen]);
 
-	  }    
+
+	  }
+
+	  if (topPt>0.&&antitopPt>0.) {
+	    float topptweight = topPtWeight(topPt,antitopPt);
+	    weight *= topptweight;
+	    top_weight = topptweight;
+	      cout<<"  "<<topPt<<"  "<<antitopPt<<"  "<<topptweight<<endl;
+	  }
+	}
+
+
+      histTopPt->Fill(0.,topptweight);
 
 	  if (!isData ) {
 	    weight *= analysisTree.genweight;
 	    gen_weight *=analysisTree.genweight;
 	   // std::cout <<"analysisTree.genweight "<< float(analysisTree.genweight) << std::endl;
+	  lumi=true;
 	  }
 					
 				
-	  lumi=true;
-	  //cout<<"  weight from init "<<genweights<< "  "<<analysisTree.genweight<<"  "<<weight<<endl;
-	}
 
 
 
@@ -677,17 +695,14 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
      //////////////MET filters flag
       if (!SUSY){
 
-	/* 
+	 
 	 metFlags.push_back("Flag_HBHENoiseFilter");
 	 metFlags.push_back("Flag_HBHENoiseIsoFilter");
-	 metFlags.push_back("Flag_CSCTightHalo2015Filter");
+	 metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
 	 metFlags.push_back("Flag_goodVertices");
-	 metFlags.push_back("Flag_eeBadScFilter");*/
-	 metFlags.push_back("Flag_METFilters");
-	 //metFlags.push_back("Flag_CSCTightHalo2015Filter");
-	// metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
-	// metFlags.push_back("Flag_HBHENoiseFilter");
-	// metFlags.push_back("Flag_HBHENoiseIsoFilter");
+	if (isData) metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
+	// metFlags.push_back("Flag_METFilters");
+	 metFlags.push_back("Flag_eeBadScFilter");
 
       }
 
@@ -813,6 +828,10 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       if (muons.size()==0) continue;
 
 
+      CFCounter[iCut]+= weight;
+      CFCounter_[iCut]+= weight;
+      iCFCounter[iCut]++;
+      iCut++;
 
 
       vector<int> taus; taus.clear();
@@ -829,6 +848,10 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 
       if (taus.size()==0)  continue;
 
+      CFCounter[iCut]+= weight;
+      CFCounter_[iCut]+= weight;
+      iCFCounter[iCut]++;
+      iCut++;
 
 
       int tau_index = -1;
@@ -836,8 +859,8 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 
       float isoMuMin  = 1e+10;
       float isoTauMin = 1; 
-      if (sel_74) isoTauMin = 1e+10;
-      if (!sel_74) isoTauMin = -10;
+      if (CutBasedTauId) isoTauMin = 1e+10;
+      if (!CutBasedTauId) isoTauMin = -10;
       float ptMu = 0;
       float ptTau = 0;
       //      if (muons.size()>1||electrons.size()>1)
@@ -869,9 +892,9 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	      	analysisTree.trigobject_pt[iT]>SingleMuonTriggerPtCut) { // IsoMu Leg
 	    	float dRtrig = deltaR(analysisTree.muon_eta[mIndex],analysisTree.muon_phi[mIndex],
 				  analysisTree.trigobject_eta[iT],analysisTree.trigobject_phi[iT]);
-	    	if (dRtrig<deltaRTrigMatch) {
+	    	if (dRtrig<deltaRTrigMatch) 
 	      	isIsoMuonLegMatch = true;
-	    	}
+	    	
 	  	}
 
 	  //	  if (analysisTree.trigobject_filters[iT][nMuonTauMuonLeg]) { // MuonTau Muon Leg
@@ -891,7 +914,10 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 		}
 	}
 
-        if (!isData /*&& ( string::npos != filen.find("stau")  || string::npos != filen.find("C1") )*/ ) isIsoMuonLegMatch = true; 
+        //if (!isData /*&& ( string::npos != filen.find("stau")  || string::npos != filen.find("C1") )*/ ) isIsoMuonLegMatch = true; 
+        if (!isData) isIsoMuonLegMatch = true;
+
+	if (!isIsoMuonLegMatch) continue;
 
 
 	for (unsigned int it=0; it<taus.size(); ++it) {
@@ -903,14 +929,11 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 
 	  if (dR<dRleptonsCutmutau) continue;
 
-	  bool trigMatch = isIsoMuonLegMatch;
-	  if (!trigMatch) continue;
-	  
 
-	  float isoTau =1;
+	  float isoTau = 1.;
 
 
-	if (sel_74){
+if (CutBasedTauId){
   isoTau= analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tIndex];
 
 	  if (int(mIndex)!=(int)mu_index) {
@@ -948,8 +971,9 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	    }
 	  }
 	  
-	}
-	if (!sel_74){
+}	 
+
+if (!CutBasedTauId){
    isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
 
           if (int(mIndex)!=mu_index) {
@@ -986,8 +1010,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
               tau_index = int(tIndex);
             }
           }
-
-        }
+	}
 
       }
  }
@@ -997,8 +1020,13 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 
         //    std::cout << "mIndex = " << mu_index << "   tau_index = " << tau_index << std::endl;
 
-      if (tau_index<0) continue;
-      if (mu_index<0) continue;
+      if ((int)tau_index<0) continue;
+      if ((int)mu_index<0) continue;
+
+      CFCounter[iCut]+= weight;
+      CFCounter_[iCut]+= weight;
+      iCFCounter[iCut]++;
+      iCut++;
       //      std::cout << "Ok4 " << std::endl;
 
 
@@ -1010,8 +1038,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	
 	bool tauPass =false;float isoTau = -999;
 
-	if (!sel_74)
-	{
+	if (!CutBasedTauId){
 		tauPass=
 	  	  analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&
 	 	  analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
@@ -1020,19 +1047,19 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
  
        isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
        ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
-	}
 
-	if (sel_74)
-	{
+	 }
+
+	if (CutBasedTauId){
 		tauPass=
-	 	 analysisTree.tau_againstElectronVLooseMVA5[tau_index]>0.5 &&
+	 	 analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&
 	  	 analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
 	         analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index] > 0.5;
 
           isoTau = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tau_index];
           ta_IsoFlag=analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index];
 	}
- 
+
 	if (!tauPass) continue;
 
       ta_relIso[0]=isoTauMin;
@@ -1145,7 +1172,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       // applying inclusive selection
 
    	event_secondLeptonVeto = dilepton_veto;
-	if (dilepton_veto)  continue;
+//	if (dilepton_veto)  continue;
 
       CFCounter[iCut]+= weight;
       CFCounter_[iCut]+= weight;
@@ -1153,8 +1180,8 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       iCut++;
 
         if(extraelec_veto || extramuon_veto)   event_secondLeptonVeto = true;
-	if (extraelec_veto) continue;
-	if (extramuon_veto) continue;
+//	if (extraelec_veto) continue;
+//	if (extramuon_veto) continue;
 
 
       CFCounter[iCut]+= weight;
@@ -1174,7 +1201,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       float EffFromData = (float)SF_muonTrigger->get_EfficiencyData(double(ptMu1),double(etaMu1));
       /*float Mu17EffMC   = (float)SF_muonTrigger->get_EfficiencyMC(double(ptMu1),double(etaMu1));*/
 	
-      bool Signal = true;
+      //bool Signal = true;
 
 	//if (!isData && (   string::npos != filen.find("stau") || string::npos != filen.find("C1")) ) Signal=true;
      /* if (!isData) {
@@ -1186,8 +1213,9 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	//	cout<<" Trigger weight "<<trigweight<<endl;
       }*/
 	if (!isData) trigweight = EffFromData;
-	weight *= trigweight;
-	trig_weight = trigweight;
+      weight *= trigweight;
+      trig_weight = trigweight;
+
       CFCounter[iCut]+= weight;
       CFCounter_[iCut]+= weight;
       iCFCounter[iCut]++;
@@ -1251,16 +1279,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       iCut++;
 
 
-      if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
-	{
 
-	  if (topPt>0.&&antitopPt>0.) {
-	    float topptweight = topPtWeight(topPt,antitopPt);
-	    //  cout<<"  "<<topPt<<"  "<<antitopPt<<endl;
-	    weight *= topptweight;
-	    top_weight = topptweight;
-	  }
-	}
 
       CFCounter[iCut]+= weight;
       CFCounter_[iCut]+= weight;
@@ -1563,6 +1582,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
   hxsec->Write();
   inputEventsH->Write();
   histWeightsH->Write();
+  histTopPt->Write();
   histRuns->Write();
   CutFlowUnW->Write();
   CutFlow->Write();

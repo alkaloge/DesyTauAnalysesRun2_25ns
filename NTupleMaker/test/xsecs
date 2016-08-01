@@ -1,6 +1,9 @@
  SMS-TChiSlepSnu_x0p5  1                             
  SMS-TStauStau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8 1
  SMS-TChiStauStau_x0p5 1
+ SMS-TChiStauStau 1
+ SMS-TStauStau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/SMS-TStauStau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_107 1
+ SMS-TStauStau 1
  test 1
  TTJets 831.76
  TTJets_powheg 831.76
@@ -225,6 +228,9 @@
  GluGluToHToTauTau_M-125 43.92 0.0632
  ttHJetToTT_M125 0.5085 0.5085
  SingleMuon 1
+ SingleMuon__Run2016B-PromptReco-v2
+ SingleMuon__Run2016C-PromptReco-v2
+ SingleMuon__Run2016D-PromptReco-v2
  SingleMuon_QCD 1
  SingleMuon_nof 1
  SingleMuonPRv1 1

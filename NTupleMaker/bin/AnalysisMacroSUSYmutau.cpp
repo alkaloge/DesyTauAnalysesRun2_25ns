@@ -248,7 +248,8 @@ int main(int argc, char * argv[]) {
 // PU reweighting
   PileUp * PUofficial = new PileUp();
   //TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/Data_Run2016B_pileup.root","read");
-  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_2016_Cert_Cert_271036-276811_NoL1T_xsec63mb.root","read");
+  //TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_2016_Cert_Cert_271036-276811_NoL1T_xsec63mb.root","read");
+  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_Cert_271036-276811_13TeV_PromptReco_Collisions16_xsec69p2mb.root","read");
   TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/MC_Spring16_PU.root", "read");
   TH1D * PU_data = (TH1D *)filePUdistribution_data->Get("pileup");
   TH1D * PU_mc = (TH1D *)filePUdistribution_MC->Get("pileup");
@@ -500,9 +501,6 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
     if(!isData && WithInit) 
       {
 
-	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
-	     
-	genweightsTree->SetBranchAddress("genweight",&genweights);
 	Long64_t numberOfEntriesInit = genweightsTree->GetEntries();
 	for (Long64_t iEntryInit=0; iEntryInit<numberOfEntriesInit; ++iEntryInit) { 
 	  genweightsTree->GetEntry(iEntryInit);
@@ -584,6 +582,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       Float_t genweight;
       float topPt = 0;
       float antitopPt = 0;
+      float topweight=1.;
       LSF_weight = 1.;
       TFR_weight = 1.;
       top_weight = 1.;
@@ -609,16 +608,16 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	  }
 
 	  if (topPt>0.&&antitopPt>0.) {
-	    float topptweight = topPtWeight(topPt,antitopPt);
+	    topptweight = topPtWeight(topPt,antitopPt);
 	    weight *= topptweight;
 	    top_weight = topptweight;
-	      cout<<"  "<<topPt<<"  "<<antitopPt<<"  "<<topptweight<<endl;
+	     // cout<<"  "<<topPt<<"  "<<antitopPt<<"  "<<topptweight<<endl;
 	  }
-	}
 
 
       histTopPt->Fill(0.,topptweight);
 
+	}
 	  if (!isData ) {
 	    weight *= analysisTree.genweight;
 	    gen_weight *=analysisTree.genweight;
@@ -700,7 +699,7 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	 metFlags.push_back("Flag_HBHENoiseIsoFilter");
 	 metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
 	 metFlags.push_back("Flag_goodVertices");
-	if (isData) metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
+	 metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
 	// metFlags.push_back("Flag_METFilters");
 	 metFlags.push_back("Flag_eeBadScFilter");
 
@@ -765,8 +764,8 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       if (!isData) 
 	{
 	  if (applyPUreweighting)	 {
-	    /*puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));*/
-		puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
+	    puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));
+	//	puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
 	    weight *=puweight; 
 	    pu_weight = puweight;
 	  }
@@ -828,12 +827,6 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       if (muons.size()==0) continue;
 
 
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
-
-
       vector<int> taus; taus.clear();
       for (unsigned int it = 0; it<analysisTree.tau_count; ++it) {
 
@@ -847,11 +840,6 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
 	}
 
       if (taus.size()==0)  continue;
-
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
 
 
       int tau_index = -1;
@@ -974,7 +962,8 @@ if (CutBasedTauId){
 }	 
 
 if (!CutBasedTauId){
-   isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
+   //isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
+   isoTau = analysisTree.tau_chargedIsoPtSum[tIndex];
 
           if (int(mIndex)!=mu_index) {
             if (relIsoMu==isoMuMin) {
@@ -1023,10 +1012,6 @@ if (!CutBasedTauId){
       if ((int)tau_index<0) continue;
       if ((int)mu_index<0) continue;
 
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
       //      std::cout << "Ok4 " << std::endl;
 
 
@@ -1042,11 +1027,14 @@ if (!CutBasedTauId){
 		tauPass=
 	  	  analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&
 	 	  analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
-	  	  analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
+	  	  //analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
+	  	  analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
 
  
-       isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
-       ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
+       //isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
+       //ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
+       isoTau = analysisTree.tau_chargedIsoPtSum[tau_index];
+       ta_IsoFlag=analysisTree.tau_chargedIsoPtSum[tau_index];
 
 	 }
 
@@ -1508,6 +1496,7 @@ if (!CutBasedTauId){
       }
       njets = jets.size();
       npv =  analysisTree.primvertex_count;
+      npu = analysisTree.numtruepileupinteractions;
       countjets = jets.size();
       jet_count = jets.size();
       //njetspt20 = jetspt20.size();

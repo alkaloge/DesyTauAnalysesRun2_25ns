@@ -132,38 +132,63 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 }
 
 */
+
+//80x
+/*
 if (sel =="mutau" || sel == "eltau"){
 
 if (  fabs(eta) < 0.9 ) 
 	{
-		if (pt>20 && pt<30) SF = 0.372714;
-		if (pt>30 && pt<50) SF = 0.485751;
-		if (pt>50 ) SF = 0.835454;
+		if (pt>20 && pt<30) SF = 0.265267;
+		if (pt>30 && pt<50) SF = 0.359452;
+		if (pt>50 ) SF = 0.625113;
 	}
 if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.448388;
-		if (pt>30 && pt<50) SF = 0.832162;
-		if (pt>50 ) SF = 2.54091;
+		if (pt>20 && pt<30) SF = 0.252166;
+		if (pt>30 && pt<50) SF = 0.51573;
+		if (pt>50 ) SF = 2.48893;
 	}
 
 if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.409646;
-		if (pt>30 && pt<50) SF = 0.520366;
-		if (pt>60) SF = 0.725716;
+		if (pt>20 && pt<30) SF = 0.400911;
+		if (pt>30 && pt<50) SF = 0.4481;
+		if (pt>60) SF = 0.672542;
 	}
 }
+*/
 
+if (sel =="mutau" || sel == "eltau"){
+
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 0.454831;
+		if (pt>30 && pt<50) SF = 0.491942;
+		if (pt>50 ) SF = 1.033;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.470673;
+		if (pt>30 && pt<50) SF = 0.89675;
+		if (pt>50 ) SF = 1.62579;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.479281;
+		if (pt>30 && pt<50) SF = 0.580092;
+		if (pt>60) SF = 0.792938;
+	}
+}
 return SF;
 
 
 }
-
-
-
 
 
 float Dzeta(TLorentzVector LV, TLorentzVector muV, TLorentzVector MetV)

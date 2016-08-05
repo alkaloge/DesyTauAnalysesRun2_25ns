@@ -39,7 +39,7 @@ vector<TLorentzVector>  TauMV;
 vector<TLorentzVector>  LeptMV;
 
 
-double TauFakeRate(float pt,float eta, string sel){
+double TauFakeRate(float pt,float eta, string sel,string working_point){
 
 float SF = 1;
 
@@ -160,33 +160,61 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 	}
 }
 */
-
-if (sel =="mutau" || sel == "eltau"){
+// Charged
+if ( (sel =="mutau" || sel == "eltau") && working_point == "ChargedIso" ){
 
 if (  fabs(eta) < 0.9 ) 
 	{
-		if (pt>20 && pt<30) SF = 0.454831;
-		if (pt>30 && pt<50) SF = 0.491942;
-		if (pt>50 ) SF = 1.033;
+		if (pt>20 && pt<30) SF = 0.64919;
+		if (pt>30 && pt<50) SF = 0.829278;
+		if (pt>50 ) SF = 1.38857;
 	}
 if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.470673;
-		if (pt>30 && pt<50) SF = 0.89675;
-		if (pt>50 ) SF = 1.62579;
+		if (pt>20 && pt<30) SF = 0.663215;
+		if (pt>30 && pt<50) SF = 0.701668;
+		if (pt>50 ) SF = 1.60393;
 	}
 
 if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.479281;
-		if (pt>30 && pt<50) SF = 0.580092;
-		if (pt>60) SF = 0.792938;
+		if (pt>20 && pt<30) SF = 0.665546;
+		if (pt>30 && pt<50) SF = 0.764087;
+		if (pt>60) SF = 1.2188;
 	}
 }
-return SF;
 
+
+//CutBased
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased" ){
+
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 0.541367;
+		if (pt>30 && pt<50) SF = 0.683679;
+		if (pt>50 ) SF = 0.96842;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.757767;
+		if (pt>30 && pt<50) SF = 0.882711;
+		if (pt>50 ) SF = 0.75345;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.566726;
+		if (pt>30 && pt<50) SF = 0.664945;
+		if (pt>60) SF = 0.820108;
+	}
+}
+
+
+return SF;
 
 }
 

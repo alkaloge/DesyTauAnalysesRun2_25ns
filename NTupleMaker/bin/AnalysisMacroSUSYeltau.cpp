@@ -1504,7 +1504,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   hxsec->Write();
   inputEventsH->Write();
   histWeightsH->Write();
-  histTopPt->Fill(0.,topptweight);
+  histTopPt->Write();
   histRuns->Write();
   CutFlowUnW->Write();
   CutFlow->Write();

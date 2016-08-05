@@ -405,7 +405,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   int selEventsAllMuons = 0;
   int selEventsIdMuons = 0;
   int selEventsIsoMuons = 0;
-  bool CutBasedTauId = true;
+  bool CutBasedTauId = false;
   bool lumi=false;
   bool isLowIsoMu=false;
   bool isHighIsoMu = false;
@@ -584,7 +584,6 @@ cout<< "analysisTree.SusyLSPMass  "<< analysisTree.SusyLSPMass<<endl;}
       Float_t genweight;
       float topPt = 0;
       float antitopPt = 0;
-      float topweight=1.;
       LSF_weight = 1.;
       TFR_weight = 1.;
       top_weight = 1.;
@@ -1064,9 +1063,9 @@ if (!CutBasedTauId){
       iCut++;
 
 
-  bool          dilepton_veto;
-  bool          extraelec_veto;
-  bool          extramuon_veto;
+  bool          dilepton_veto=false;
+  bool          extraelec_veto=false;
+  bool          extramuon_veto=false;
 
       // looking for extra electron
       bool foundExtraElectron = false;
@@ -1127,7 +1126,7 @@ if (!CutBasedTauId){
 	    relIsoMu<isoDilepMuonCut)
 	  mu_dimuons.push_back(im);
 
-	if (int(im)==(int)mu_index) continue;
+	if ((int)im==(int)mu_index) continue;
 	if (analysisTree.muon_pt[im]<ptVetoMuonCut) continue;
 	if (fabs(analysisTree.muon_eta[im])>etaVetoMuonCut) continue;
 	if (fabs(analysisTree.muon_dxy[im])>dxyVetoMuonCut) continue;

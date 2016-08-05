@@ -456,7 +456,7 @@ const    int nEtaBins = 3;
     //statUnc[i] =0;
   }
   bool lumi=false;
-  bool CutBasedTauId = true;
+  bool CutBasedTauId = false;
 
 
   std::string dummy;

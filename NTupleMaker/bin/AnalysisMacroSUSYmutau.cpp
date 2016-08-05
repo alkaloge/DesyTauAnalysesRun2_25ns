@@ -405,7 +405,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   int selEventsAllMuons = 0;
   int selEventsIdMuons = 0;
   int selEventsIsoMuons = 0;
-  bool CutBasedTauId = false;
+  bool CutBasedTauId = true;
   bool lumi=false;
   bool isLowIsoMu=false;
   bool isHighIsoMu = false;
@@ -542,6 +542,8 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
       Float_t weight = 1;
       Float_t puweight = 1;
       Float_t topptweight = 1;
+      npv =  analysisTree.primvertex_count;
+      npu = analysisTree.numtruepileupinteractions;
       analysisTree.GetEntry(iEntry);
 /*
 if (analysisTree.SusyMotherMass < 110 && analysisTree.SusyLSPMass < 11 ) {
@@ -929,19 +931,19 @@ if (CutBasedTauId){
 	      if (analysisTree.muon_pt[mIndex]>ptMu) {
 		isoMuMin  = relIsoMu;
 		ptMu = analysisTree.muon_pt[mIndex];
-		mu_index = int(mIndex);
+		mu_index =(int)mIndex;
 		isoTauMin = isoTau;
 		ptTau = analysisTree.tau_pt[tIndex];
-		tau_index = int(tIndex);
+		tau_index =(int)tIndex;
 	      }
 	    }
 	    else if (relIsoMu<isoMuMin) {
 	      isoMuMin  = relIsoMu;
 	      ptMu = analysisTree.muon_pt[mIndex];
-	      mu_index = int(mIndex);
+	      mu_index =(int)mIndex;
 	      isoTauMin = isoTau;
 	      ptTau = analysisTree.tau_pt[tIndex];
-	      tau_index = int(tIndex);
+	      tau_index =(int)tIndex;
 	    }
 	  }
 	  else {
@@ -949,13 +951,13 @@ if (CutBasedTauId){
 	      if (analysisTree.tau_pt[tIndex]>ptTau) {
 		ptTau = analysisTree.tau_pt[tIndex];
 		isoTauMin = isoTau;
-		tau_index = int(tIndex);
+		tau_index =(int)tIndex;
 	      }
 	    }
 	    else if (isoTau<isoTauMin) {
 	      ptTau = analysisTree.tau_pt[tIndex];
 	      isoTauMin = isoTau;
-	      tau_index = int(tIndex);
+	      tau_index =(int)tIndex;
 	    }
 	  }
 	  
@@ -970,19 +972,19 @@ if (!CutBasedTauId){
               if (analysisTree.muon_pt[mIndex]>ptMu) {
                 isoMuMin  = relIsoMu;
                 ptMu = analysisTree.muon_pt[mIndex];
-                mu_index = int(mIndex);
+                mu_index =(int)mIndex;
                 isoTauMin = isoTau;
                 ptTau = analysisTree.tau_pt[tIndex];
-                tau_index = int(tIndex);
+                tau_index =(int)tIndex;
               }
             }
             else if (relIsoMu<isoMuMin) {
               isoMuMin  = relIsoMu;
               ptMu = analysisTree.muon_pt[mIndex];
-              mu_index = int(mIndex);
+              mu_index =(int)mIndex;
               isoTauMin = isoTau;
               ptTau = analysisTree.tau_pt[tIndex];
-              tau_index = int(tIndex);
+              tau_index =(int)tIndex;
             }
           }
           else {
@@ -990,13 +992,13 @@ if (!CutBasedTauId){
               if (analysisTree.tau_pt[tIndex]>ptTau) {
                 ptTau = analysisTree.tau_pt[tIndex];
                 isoTauMin = isoTau;
-                tau_index = int(tIndex);
+                tau_index =(int)tIndex;
               }
             }
             else if (isoTau>isoTauMin) {
               ptTau = analysisTree.tau_pt[tIndex];
               isoTauMin = isoTau;
-              tau_index = int(tIndex);
+              tau_index =(int)tIndex;
             }
           }
 	}
@@ -1005,7 +1007,11 @@ if (!CutBasedTauId){
  }
 
 
+      bool TauId = false;
 
+            if ( analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&   analysisTree.tau_againstMuonTight3[tau_index]>0.5) TauId = true;
+
+	if (!TauId) continue;
 
         //    std::cout << "mIndex = " << mu_index << "   tau_index = " << tau_index << std::endl;
 
@@ -1025,8 +1031,6 @@ if (!CutBasedTauId){
 
 	if (!CutBasedTauId){
 		tauPass=
-	  	  analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&
-	 	  analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
 	  	  //analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
 	  	  analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
 
@@ -1040,8 +1044,6 @@ if (!CutBasedTauId){
 
 	if (CutBasedTauId){
 		tauPass=
-	 	 analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&
-	  	 analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
 	         analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index] > 0.5;
 
           isoTau = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tau_index];
@@ -1167,10 +1169,10 @@ if (!CutBasedTauId){
       iCFCounter[iCut]++;
       iCut++;
 
-        if(extraelec_veto || extramuon_veto)   event_secondLeptonVeto = true;
 //	if (extraelec_veto) continue;
 //	if (extramuon_veto) continue;
 
+      if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
 
       CFCounter[iCut]+= weight;
       CFCounter_[iCut]+= weight;
@@ -1268,11 +1270,6 @@ if (!CutBasedTauId){
 
 
 
-
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
 
       //////////////////////////////////////////////
       muon_index = (int)mu_index;
@@ -1495,8 +1492,6 @@ if (!CutBasedTauId){
 	JetsMV.push_back(JetsV);
       }
       njets = jets.size();
-      npv =  analysisTree.primvertex_count;
-      npu = analysisTree.numtruepileupinteractions;
       countjets = jets.size();
       jet_count = jets.size();
       //njetspt20 = jetspt20.size();

@@ -249,7 +249,8 @@ int main(int argc, char * argv[]) {
 
 // PU reweighting
   PileUp * PUofficial = new PileUp();
-   TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_2016_Cert_Cert_271036-276811_NoL1T_xsec63mb.root","read");
+   //TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_2016_Cert_Cert_271036-276811_NoL1T_xsec63mb.root","read");
+  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_Cert_271036-276811_13TeV_PromptReco_Collisions16_xsec69p2mb.root","read");
    TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/MC_Spring16_PU.root", "read");
 
   TH1D * PU_data = (TH1D *)filePUdistribution_data->Get("pileup");
@@ -552,7 +553,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 */
       //isData= false;
       bool lumi=false;
-      bool sel_74 = false;
+      bool CutBasedTauId = false;
       isLowIsoEl=false;
       isHighIsoEl = false;
       isLowIsoTau=false;
@@ -568,9 +569,13 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       pu_weight = 1.;
       gen_weight = 1.;
       trig_weight = 1.;
-      if(!isData) 
+
+	  
+
+      if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
 	{
 	  for (unsigned int igen=0; igen<analysisTree.genparticles_count; ++igen) {
+	    // 		cout<< "  info = " <<  int(analysisTree.genparticles_count) <<"  "<<int(analysisTree.genparticles_pdgid[igen])<<endl;
 
 	    if (analysisTree.genparticles_pdgid[igen]==6)
 	      topPt = TMath::Sqrt(analysisTree.genparticles_px[igen]*analysisTree.genparticles_px[igen]+
@@ -579,17 +584,33 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	      antitopPt = TMath::Sqrt(analysisTree.genparticles_px[igen]*analysisTree.genparticles_px[igen]+
 				      analysisTree.genparticles_py[igen]*analysisTree.genparticles_py[igen]);
 
-	  }    
 
-	  if (!isData ) {
-	    weight *= analysisTree.genweight;
-	    gen_weight *=analysisTree.genweight;
+	  }
+
+	  if (topPt>0.&&antitopPt>0.) {
+	    topptweight = topPtWeight(topPt,antitopPt);
+	    weight *= topptweight;
+	    top_weight = topptweight;
+	     // cout<<"  "<<topPt<<"  "<<antitopPt<<"  "<<topptweight<<endl;
 	  }
 
 
-	  lumi=true;
-	  //cout<<"  weight from init "<<genweights<< "  "<<analysisTree.genweight<<"  "<<weight<<endl;
+      histTopPt->Fill(0.,topptweight);
+
 	}
+	  if (!isData ) {
+	    weight *= analysisTree.genweight;
+	    gen_weight *=analysisTree.genweight;
+	   // std::cout <<"analysisTree.genweight "<< float(analysisTree.genweight) << std::endl;
+	  lumi=true;
+	  }
+					
+				
+
+
+
+
+
 
 
       if (isData)  {
@@ -648,17 +669,14 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
      //////////////MET filters flag
       if (!SUSY){
 
-	/* 
+	 
 	 metFlags.push_back("Flag_HBHENoiseFilter");
 	 metFlags.push_back("Flag_HBHENoiseIsoFilter");
-	 metFlags.push_back("Flag_CSCTightHalo2015Filter");
+	 metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
 	 metFlags.push_back("Flag_goodVertices");
-	 metFlags.push_back("Flag_eeBadScFilter");*/
-	 metFlags.push_back("Flag_METFilters");
-	 //metFlags.push_back("Flag_CSCTightHalo2015Filter");
-	// metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
-	// metFlags.push_back("Flag_HBHENoiseFilter");
-	// metFlags.push_back("Flag_HBHENoiseIsoFilter");
+	 metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
+	// metFlags.push_back("Flag_METFilters");
+	 metFlags.push_back("Flag_eeBadScFilter");
 
       }
 
@@ -801,8 +819,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       float isoElecMin  = 1e+10;
       float isoTauMin = 1; 
-      if (sel_74) isoTauMin = 1e+10;
-      if (!sel_74) isoTauMin = -10;
+      if (CutBasedTauId) isoTauMin = 1e+10;
+      if (!CutBasedTauId) isoTauMin = -10;
       float ptMu = 0;
       float ptTau = 0;
       //      if (electrons.size()>1||electrons.size()>1)
@@ -857,7 +875,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  
 	
 	  float isoTau =1;
-	if (sel_74){
+	if (CutBasedTauId){
 	isoTau = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tIndex];
 
 	  if ( (int) mIndex!= (int)el_index) {
@@ -865,19 +883,19 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	      if (analysisTree.electron_pt[mIndex]>ptMu) {
 		isoElecMin  = relIsoElec;
 		ptMu = analysisTree.electron_pt[mIndex];
-		el_index = int(mIndex);
+		el_index = (int)mIndex;
 		isoTauMin = isoTau;
 		ptTau = analysisTree.tau_pt[tIndex];
-		tau_index = int(tIndex);
+		tau_index = (int)tIndex;
 	      }
 	    }
 	    else if (relIsoElec<isoElecMin) {
 	      isoElecMin  = relIsoElec;
 	      ptMu = analysisTree.electron_pt[mIndex];
-	      el_index = int(mIndex);
+	      el_index = (int)mIndex;
 	      isoTauMin = isoTau;
 	      ptTau = analysisTree.tau_pt[tIndex];
-	      tau_index = int(tIndex);
+	      tau_index = (int)tIndex;
 	    }
 	  }
 	  else {
@@ -885,13 +903,13 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	      if (analysisTree.tau_pt[tIndex]>ptTau) {
 		ptTau = analysisTree.tau_pt[tIndex];
 		isoTauMin = isoTau;
-		tau_index = int(tIndex);
+		tau_index = (int)tIndex;
 	      }
 	    }
 	    else if (isoTau<isoTauMin) {
 	      ptTau = analysisTree.tau_pt[tIndex];
 	      isoTauMin = isoTau;
-	      tau_index = int(tIndex);
+	      tau_index = (int)tIndex;
 	    }
 	  }
 	  
@@ -899,7 +917,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 
 
-	if (!sel_74){
+	if (!CutBasedTauId){
    isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
 
 	  if ( (int) mIndex!= (int)el_index) {
@@ -907,20 +925,20 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	      if (analysisTree.electron_pt[mIndex]>ptMu) {
 		isoElecMin  = relIsoElec;
 		ptMu = analysisTree.electron_pt[mIndex];
-		el_index = int(mIndex);
+		el_index = (int)mIndex;
 		isoTauMin = isoTau;
 		ptTau = analysisTree.tau_pt[tIndex];
-		tau_index = int(tIndex);
+		tau_index = (int)tIndex;
 	      }
 	    }
 
 	    else if (relIsoElec<isoElecMin) {
 	      isoElecMin  = relIsoElec;
 	      ptMu = analysisTree.electron_pt[mIndex];
-	      el_index = int(mIndex);
+	      el_index = (int)mIndex;
 	      isoTauMin = isoTau;
 	      ptTau = analysisTree.tau_pt[tIndex];
-	      tau_index = int(tIndex);
+	      tau_index = (int)tIndex;
 	    }
           }
           else {
@@ -928,13 +946,13 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
               if (analysisTree.tau_pt[tIndex]>ptTau) {
                 ptTau = analysisTree.tau_pt[tIndex];
                 isoTauMin = isoTau;
-                tau_index = int(tIndex);
+                tau_index = (int)tIndex;
               }
             }
             else if (isoTau<isoTauMin) {
               ptTau = analysisTree.tau_pt[tIndex];
               isoTauMin = isoTau;
-              tau_index = int(tIndex);
+              tau_index = (int)tIndex;
             }
           }
 
@@ -943,6 +961,12 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       }
       }
       //      std::cout << "mIndex = " << el_index << "   tau_index = " << tau_index << std::endl;
+      //
+      bool TauId = false;
+
+            if ( analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&   analysisTree.tau_againstMuonTight3[tau_index]>0.5) TauId = true;
+
+	if (!TauId) continue;
 
       if ((int)tau_index<0) continue;
       if ((int)el_index<0) continue;
@@ -950,11 +974,9 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 	bool tauPass =false;float isoTau = -999;
 
-	if (!sel_74)
+	if (!CutBasedTauId)
 	{
 		tauPass=
-	  	  analysisTree.tau_againstElectronVLooseMVA6[tau_index]>0.5 &&
-	 	  analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
 	  	  analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
 
  
@@ -962,11 +984,9 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
        ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
 	}
 
-	if (sel_74)
+	if (CutBasedTauId)
 	{
 		tauPass=
-	 	 analysisTree.tau_againstElectronVLooseMVA5[tau_index]>0.5 &&
-	  	 analysisTree.tau_againstMuonTight3[tau_index]>0.5 &&
 	         analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index] > 0.5;
 
           isoTau = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tau_index];
@@ -1000,7 +1020,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	if (fabs(analysisTree.muon_eta[ie])>etaVetoMuonCut) continue;
 	if (fabs(analysisTree.muon_dxy[ie])>dxyVetoMuonCut) continue;
 	if (fabs(analysisTree.muon_dz[ie])>dzVetoMuonCut) continue;
-	if (applyVetoMuonId && !analysisTree.muon_isMedium[ie]) continue;
+	//if (applyVetoMuonId && !analysisTree.muon_isMedium[ie]) continue;
+	if (applyVetoMuonId && !analysisTree.muon_isICHEP[ie]) continue;
 	float neutralHadIsoMu = analysisTree.muon_neutralHadIso[ie];
         float photonIsoMu = analysisTree.muon_photonIso[ie];
         float chargedHadIsoMu = analysisTree.muon_chargedHadIso[ie];
@@ -1089,9 +1110,9 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCFCounter[iCut]++;
       iCut++;
 
-        if(extraelec_veto || extramuon_veto)   event_secondLeptonVeto = true;
-	if (extraelec_veto) continue;
-	if (extramuon_veto) continue;
+        if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
+//	if (extraelec_veto) continue;
+//	if (extramuon_veto) continue;
 
 
 
@@ -1187,23 +1208,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCFCounter[iCut]++;
       iCut++;
 
-      ///////////apply TopPtWeight
-      if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
-	{
-
-	  if (topPt>0.&&antitopPt>0.) {
-	    float topptweight = topPtWeight(topPt,antitopPt);
-	    //  cout<<"  "<<topPt<<"  "<<antitopPt<<endl;
-	    weight *= topptweight;
-	    top_weight = topptweight;
-	  }
-	}
-
-
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
 
       ///////////////////////////////////////////////////////////
       //////////////////////////////////////////////
@@ -1500,6 +1504,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   hxsec->Write();
   inputEventsH->Write();
   histWeightsH->Write();
+  histTopPt->Fill(0.,topptweight);
   histRuns->Write();
   CutFlowUnW->Write();
   CutFlow->Write();

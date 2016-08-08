@@ -43,6 +43,7 @@ int el_index=-1;
    Int_t	   nbtag;
    Int_t	   njets;
    Int_t	   npv;
+   Int_t 	   npu;
    Float_t         mu_px[20];   //[mu_count]
    Float_t         mu_py[20];   //[mu_count]
    Float_t         mu_pz[20];   //[mu_count]
@@ -253,6 +254,7 @@ vector<string> CutList;
 TH1D * histRuns = new TH1D("histRuns","",6000,24000,30000);
 
 TH1D * histWeightsH = new TH1D("histWeightsH","",1,-0.5,0.5);
+TH1D * histTopPt = new TH1D("histTopPt","",1,-0.5,0.5);
 
 TH1D * hWeights [CutN];
 
@@ -545,6 +547,7 @@ T  = new TTree("T","T");
   T->Branch("jet_count", &jet_count, "jet_count/I");
   T->Branch("njets", &njets, "njets/I");
   T->Branch("npv", &npv, "npv/I");
+  T->Branch("npu", &npu, "npu/I");
   T->Branch("jets_cleaned", &jets_cleaned, "jets_cleaned[30]/I");
   T->Branch("jet_e", jet_e, "jet_e[30]/F");
   T->Branch("jet_px", jet_px, "jet_px[30]/F");

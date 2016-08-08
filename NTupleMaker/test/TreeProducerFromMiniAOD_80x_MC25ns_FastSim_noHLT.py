@@ -8,7 +8,7 @@ period = 'Spring16'
 
 #configurable options =======================================================================
 runOnData=isData #data/MC switch
-usePrivateSQlite=True #use external JECs (sqlite file) /// OUTDATED for 25ns
+usePrivateSQlite=False #use external JECs (sqlite file) /// OUTDATED for 25ns
 useHFCandidates=True #create an additionnal NoHF slimmed MET collection if the option is set to false  == existing as slimmedMETsNoHF
 applyResiduals=True #application of residual corrections. Have to be set to True once the 13 TeV residual corrections are available. False to be kept meanwhile. Can be kept to False later for private tests or for analysis checks and developments (not the official recommendation!).
 #===================================================================
@@ -64,7 +64,7 @@ if usePrivateSQlite:
     if runOnData:
       era="Spring16_25nsV3_DATA"
     else:
-      era="Spring16_25nsFastSimMC_V1"
+      era="Spring16_25nsV3_MC"
     
     dBFile = os.path.expandvars("$CMSSW_BASE/src/DesyTauAnalyses/NTupleMaker/data/JEC/"+era+".db")
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
@@ -152,8 +152,9 @@ fnames = []
 if runOnData:
   fnames.append('/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/273/448/00000/CECFFCBE-CE1C-E611-8660-02163E011A4E.root')
 else:
-  fnames.append('/store/mc/RunIISpring16MiniAODv2/SMS-TChipmSlepSnu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/00000/020B1F3D-B52B-E611-9BA8-0025905C95F8.root')
-    
+  #fnames.append('/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/00000/00F0B3DC-211B-E611-A6A0-001E67248A39.root')
+  fnames.append('/store/mc/RunIISpring16MiniAODv2/SMS-TStauStau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/00011CF2-8B2C-E611-A315-0050560210EA.root')
+
 # Define the input source
 process.source = cms.Source("PoolSource", 
                             fileNames = cms.untracked.vstring( fnames ),
@@ -269,14 +270,13 @@ IsData = cms.untracked.bool(isData),
 GenParticles = cms.untracked.bool(not isData)
 )
 
-JECfile = "DesyTauAnalyses/NTupleMaker/data/JEC/Spring16_25nsFastSimV1/Spring16_FastSimV1_MC_Uncertainty_AK4PFchs.txt"
-#if isData:
-#  JECfile = "DesyTauAnalyses/NTupleMaker/data/JEC/Spring16_25nsV6/Spring16_25nsV6_DATA_Uncertainty_AK4PFchs.txt"
+JECfile = "DesyTauAnalyses/NTupleMaker/data/JEC/Spring16_25nsV6/Spring16_25nsV6_MC_Uncertainty_AK4PFchs.txt"
+if isData:
+  JECfile = "DesyTauAnalyses/NTupleMaker/data/JEC/Spring16_25nsV6/Spring16_25nsV6_DATA_Uncertainty_AK4PFchs.txt"
 
 process.makeroottree = cms.EDAnalyzer("NTupleMaker",
 # data, year, period, skim
 IsData = cms.untracked.bool(isData),
-IsFastSim = cms.untracked.bool(isFastSim),
 Year = cms.untracked.uint32(year),
 Period = cms.untracked.string(period),
 Skim = cms.untracked.uint32(0),
@@ -290,8 +290,8 @@ RecBeamSpot = cms.untracked.bool(True),
 RecTrack = cms.untracked.bool(False),
 RecPFMet = cms.untracked.bool(True),
 RecPFMetCorr = cms.untracked.bool(True),
-RecPuppiMet = cms.untracked.bool(True),
-RecMvaMet = cms.untracked.bool(True),                                      
+RecPuppiMet = cms.untracked.bool(False),
+RecMvaMet = cms.untracked.bool(False),                                      
 RecMuon = cms.untracked.bool(True),
 RecPhoton = cms.untracked.bool(False),
 RecElectron = cms.untracked.bool(True),
@@ -336,23 +336,21 @@ PVCollectionTag = cms.InputTag("offlineSlimmedPrimaryVertices"),
 SusyMotherMassTag = cms.InputTag("susyInfo","SusyMotherMass"),
 SusyLSPMassTag = cms.InputTag("susyInfo","SusyLSPMass"),
 # trigger info
-HLTriggerPaths = cms.untracked.vstring(
-'HLT_IsoMu20_v'	
-),
+HLTriggerPaths = cms.untracked.vstring(),
 TriggerProcess = cms.untracked.string("HLT"),
 Flags = cms.untracked.vstring(
-#  'Flag_HBHENoiseFilter',
-#  'Flag_HBHENoiseIsoFilter',
-#  'Flag_CSCTightHalo2015Filter',
-#  'Flag_EcalDeadCellTriggerPrimitiveFilter',
-#  'Flag_goodVertices',
-#  'Flag_eeBadScFilter',
-#  'Flag_chargedHadronTrackResolutionFilter',
-#  'Flag_muonBadTrackFilter'
-   'Flag_METFilters'
-#   'allMetFilterPaths'
+  'Flag_HBHENoiseFilter',
+  'Flag_HBHENoiseIsoFilter',
+  'Flag_CSCTightHalo2015Filter',
+  'Flag_EcalDeadCellTriggerPrimitiveFilter',
+  'Flag_goodVertices',
+  'Flag_eeBadScFilter',
+  'Flag_chargedHadronTrackResolutionFilter',
+  'Flag_muonBadTrackFilter',
+  'Flag_METFilters',
+  'allMetFilterPaths'
 ),
-FlagsProcess = cms.untracked.string("RECO"),
+FlagsProcesses = cms.untracked.vstring("RECO","PAT"),
 # tracks
 RecTrackPtMin = cms.untracked.double(0.5),
 RecTrackEtaMax = cms.untracked.double(2.4),
@@ -360,11 +358,9 @@ RecTrackDxyMax = cms.untracked.double(1.0),
 RecTrackDzMax = cms.untracked.double(1.0),
 RecTrackNum = cms.untracked.int32(0),
 # muons
-RecMuonPtMin = cms.untracked.double(5.0),
+RecMuonPtMin = cms.untracked.double(5.),
 RecMuonEtaMax = cms.untracked.double(2.5),
-RecMuonHLTriggerMatching = cms.untracked.vstring(
-'HLT_IsoMu20_v.*:hltL3crIsoL1sMu18L1f0L2f10QL3f20QL3trkIsoFiltered0p09'
-),
+RecMuonHLTriggerMatching = cms.untracked.vstring(),
 RecMuonNum = cms.untracked.int32(0),
 # photons
 RecPhotonPtMin = cms.untracked.double(20.),
@@ -395,6 +391,11 @@ RecJetNum = cms.untracked.int32(0),
 SampleName = cms.untracked.string("Data") 
 )
 #process.patJets.addBTagInfo = cms.bool(True)
+process.susyInfo = cms.EDProducer("SusyScanProducer",
+    shouldScan = cms.bool(True),
+    debug = cms.bool(False),
+    is74X = cms.bool(False)
+)
 
 process.load("RecoMET/METProducers.METSignificance_cfi")
 process.load("RecoMET/METProducers.METSignificanceParams_cfi")
@@ -416,9 +417,10 @@ process.p = cms.Path(
   process.initroottree*
   process.BadChargedCandidateFilter *
   process.BadPFMuonFilter *
+  process.susyInfo *
   process.patJetCorrFactorsReapplyJEC * process.patJetsReapplyJEC *
   process.egmGsfElectronIDSequence * 
-  process.mvaMetSequence *
+  #process.mvaMetSequence *
   process.METSignificance * process.METCorrSignificance *
   #process.HBHENoiseFilterResultProducer* #produces HBHE bools baseline
   #process.ApplyBaselineHBHENoiseFilter*  #reject events based 
@@ -431,7 +433,7 @@ process.TFileService = cms.Service("TFileService",
                                  )
 
 process.output = cms.OutputModule("PoolOutputModule",
-                                  fileName = cms.untracked.string('output_MC.root'),
+                                  fileName = cms.untracked.string('output_particles_MC.root'),
                                   outputCommands = cms.untracked.vstring(
                                     'keep *_slimmedMETs_*_*',
 				    'keep *_MVAMET_*_*',

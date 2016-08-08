@@ -1515,12 +1515,17 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
   if (csusyinfo) {
-    if(doDebug)  cout<<"add SUSY info"<< endl;
     AddSusyInfo(iEvent);
-    //    std::cout << "Run = " << event_run << "   Lumi = " << event_luminosityblock << "   Event = " << event_nr << std::endl;
-    //    std::cout << "SUSY Mother Mass = " << SusyMotherMass << std::endl;
-    //    std::cout << "SUSY LSP Mass = " << SusyLSPMass << std::endl;
-    //    std::cout << std::endl;
+  /*
+   // if(doDebug) { 
+	    cout<<"add SUSY info"<< endl;
+        std::cout << "Run = " << event_run << "   Lumi = " << event_luminosityblock << "   Event = " << event_nr << std::endl;
+        std::cout << "SUSY Mother Mass = " << SusyMotherMass << std::endl;
+        std::cout << "SUSY LSP Mass = " << SusyLSPMass << std::endl;
+        std::cout << std::endl;
+	
+  //  }
+  //  */
   }
 
 

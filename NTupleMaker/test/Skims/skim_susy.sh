@@ -2,7 +2,7 @@ dir="/nfs/dust/cms/group/higgs-kit/80x_MC_SUSY_v1/"
 
 sources="TChipmStauSnu   TChiStauStau   TStauStau"
 
-sources="TStauStau"
+#sources="TChipmStauSnu"
 
 
 
@@ -18,7 +18,19 @@ then
 out="stau-stau"
 fi
 
+if [ $model == "TChiStauStau" ] ;
+then
 
+
+out="C1N2"
+fi
+
+if [ $model == "TChipmStauSnu" ] ;
+then
+
+
+out="C1C1"
+fi
 
 COUNTER=0
 ls $dir/SMS-$model/*.root > listfiles_$model

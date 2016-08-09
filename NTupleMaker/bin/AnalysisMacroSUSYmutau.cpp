@@ -405,7 +405,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   int selEventsAllMuons = 0;
   int selEventsIdMuons = 0;
   int selEventsIsoMuons = 0;
-  bool CutBasedTauId = false;
+  bool CutBasedTauId = true;
   bool lumi=false;
   bool isLowIsoMu=false;
   bool isHighIsoMu = false;
@@ -447,6 +447,8 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
 /*TObject* br = file->FindObjectAny("initroottree");*/
 
 bool WithInit = true;
+
+if (SUSY) WithInit = false;
 
 if (WithInit) cout << "With initroottree"<<endl;
 if (!WithInit) cout << "Without initroottree"<<endl;
@@ -963,8 +965,8 @@ if (CutBasedTauId){
 }	 
 
 if (!CutBasedTauId){
-   //isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
-   isoTau = analysisTree.tau_chargedIsoPtSum[tIndex];
+   isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
+   //isoTau = analysisTree.tau_chargedIsoPtSum[tIndex];
 
           if (int(mIndex)!=mu_index) {
             if (relIsoMu==isoMuMin) {
@@ -1030,14 +1032,14 @@ if (!CutBasedTauId){
 
 	if (!CutBasedTauId){
 		tauPass=
-	  	  //analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
-	  	  analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
+	  	  analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
+	  	  //analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
 
  
-       //isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
-       //ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
-       isoTau = analysisTree.tau_chargedIsoPtSum[tau_index];
-       ta_IsoFlag=analysisTree.tau_chargedIsoPtSum[tau_index];
+       isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
+       ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
+       //isoTau = analysisTree.tau_chargedIsoPtSum[tau_index];
+       //ta_IsoFlag=analysisTree.tau_chargedIsoPtSum[tau_index];
 
 	 }
 
@@ -1066,6 +1068,12 @@ if (!CutBasedTauId){
   bool          dilepton_veto=false;
   bool          extraelec_veto=false;
   bool          extramuon_veto=false;
+      
+  event_secondLeptonVeto = false;
+      
+  event_thirdLeptonVeto = false;
+      
+  dilepton_veto = false;
 
       // looking for extra electron
       bool foundExtraElectron = false;
@@ -1101,6 +1109,8 @@ if (!CutBasedTauId){
       vector<int> mu_dimuons; mu_dimuons.clear(); 
       for (unsigned int im = 0; im<analysisTree.muon_count; ++im) {
 
+      	      if ((int)im==(int)mu_index) continue;
+
 	float neutralHadIsoMu = analysisTree.muon_neutralHadIso[im];
 	float photonIsoMu = analysisTree.muon_photonIso[im];
 	float chargedHadIsoMu = analysisTree.muon_chargedHadIso[im];
@@ -1123,10 +1133,17 @@ if (!CutBasedTauId){
 	    analysisTree.muon_isPF[im]&&
 	    fabs(analysisTree.muon_dxy[im])<dxyDilepMuonCut&&
 	    fabs(analysisTree.muon_dz[im])<dzDilepMuonCut&&
-	    relIsoMu<isoDilepMuonCut)
-	  mu_dimuons.push_back(im);
+	    relIsoMu<isoDilepMuonCut
+	    && fabs(analysisTree.muon_charge[im]==1) ){
+	    float dRmuons = deltaR(analysisTree.muon_eta[mu_index],analysisTree.muon_phi[mu_index],
+				   analysisTree.muon_eta[im],analysisTree.muon_phi[im]);
 
-	if ((int)im==(int)mu_index) continue;
+	    if (dRmuons>dRDilepVetoCut && (analysisTree.muon_charge[mu_index]*analysisTree.muon_charge[im]<0)) dilepton_veto = true;
+	}
+
+	 // mu_dimuons.push_back(im);
+
+
 	if (analysisTree.muon_pt[im]<ptVetoMuonCut) continue;
 	if (fabs(analysisTree.muon_eta[im])>etaVetoMuonCut) continue;
 	if (fabs(analysisTree.muon_dxy[im])>dxyVetoMuonCut) continue;
@@ -1140,7 +1157,9 @@ if (!CutBasedTauId){
       extraelec_veto = foundExtraElectron;
       extramuon_veto = foundExtraMuon;
     
+      if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
 
+     /* 
       dilepton_veto = false;
       if (mu_dimuons.size()>1) {
 	for (unsigned int i1=0; i1<mu_dimuons.size()-1; ++i1) {
@@ -1153,6 +1172,7 @@ if (!CutBasedTauId){
  	  }
 	}
       }
+      */
       //      cout << analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index] << endl;
       //      cout << analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index] << endl;
 
@@ -1171,14 +1191,7 @@ if (!CutBasedTauId){
 //	if (extraelec_veto) continue;
 //	if (extramuon_veto) continue;
 
-      if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
 
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
-
-      
 
 
 

@@ -133,55 +133,57 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 
 */
 
-//80x
-/*
-if (sel =="mutau" || sel == "eltau"){
+//80x MVAid
+if ( (sel =="mutau" || sel == "eltau") && working_point == "MVA"){
 
 if (  fabs(eta) < 0.9 ) 
 	{
-		if (pt>20 && pt<30) SF = 0.265267;
-		if (pt>30 && pt<50) SF = 0.359452;
-		if (pt>50 ) SF = 0.625113;
+		if (pt>20 && pt<30) SF = 0.955873;
+		if (pt>30 && pt<50) SF = 1.03768;
+		if (pt>50 ) SF = 0.703788;
 	}
 if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.252166;
-		if (pt>30 && pt<50) SF = 0.51573;
-		if (pt>50 ) SF = 2.48893;
+		if (pt>20 && pt<30) SF = 1.01357;
+		if (pt>30 && pt<50) SF = 0.937558;
+		if (pt>50 ) SF = 0.892849;
 	}
 
 if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.400911;
-		if (pt>30 && pt<50) SF = 0.4481;
-		if (pt>60) SF = 0.672542;
+		if (pt>20 && pt<30) SF = 0.999444;
+		if (pt>30 && pt<50) SF = 0.830996;
+		if (pt>60) SF = 0.753128;
 	}
 }
-*/
+
+
+
+
 // Charged
 if ( (sel =="mutau" || sel == "eltau") && working_point == "ChargedIso" ){
 
 if (  fabs(eta) < 0.9 ) 
 	{
-		if (pt>20 && pt<30) SF = 0.64919;
-		if (pt>30 && pt<50) SF = 0.829278;
+		if (pt>20 && pt<30) SF = 1.26544;
+		if (pt>30 && pt<50) SF = 1.25239;
 		if (pt>50 ) SF = 1.38857;
 	}
 if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.663215;
-		if (pt>30 && pt<50) SF = 0.701668;
+		if (pt>20 && pt<30) SF = 1.21749;
+		if (pt>30 && pt<50) SF = 1.10979;
 		if (pt>50 ) SF = 1.60393;
 	}
 
 if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.665546;
-		if (pt>30 && pt<50) SF = 0.764087;
+		if (pt>20 && pt<30) SF = 1.27961;
+		if (pt>30 && pt<50) SF = 1.14411;
 		if (pt>60) SF = 1.2188;
 	}
 }
@@ -192,32 +194,66 @@ if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased" ){
 
 if (  fabs(eta) < 0.9 ) 
 	{
-		if (pt>20 && pt<30) SF = 0.541367;
-		if (pt>30 && pt<50) SF = 0.683679;
+		if (pt>20 && pt<30) SF = 0.898437;
+		if (pt>30 && pt<50) SF = 0.946704;
 		if (pt>50 ) SF = 0.96842;
 	}
 if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.757767;
-		if (pt>30 && pt<50) SF = 0.882711;
+		if (pt>20 && pt<30) SF = 1.27757;
+		if (pt>30 && pt<50) SF = 1.26811;
 		if (pt>50 ) SF = 0.75345;
 	}
 
 if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
 	{
 
-		if (pt>20 && pt<30) SF = 0.566726;
-		if (pt>30 && pt<50) SF = 0.664945;
+		if (pt>20 && pt<30) SF = 1.0773;
+		if (pt>30 && pt<50) SF = 1.00049;
 		if (pt>60) SF = 0.820108;
 	}
 }
+
+
+
 
 
 return SF;
 
 }
 
+double TauiD(string sel,string working_point){
+
+float SF = 1;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased_Loose" )
+	SF = 0.81;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased_Medim" )
+	SF = 0.79;
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased_Tight" )
+	SF = 0.79;
+
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Vloose" )
+	SF = 0.83;
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Vloose" )
+	SF= 0.84;
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Medium" )
+	SF = 0.84;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Tight" )
+	SF = 0.83;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Vtight" )
+	SF = 0.80;
+
+
+
+return SF;
+
+}
 
 float Dzeta(TLorentzVector LV, TLorentzVector muV, TLorentzVector MetV)
 	{

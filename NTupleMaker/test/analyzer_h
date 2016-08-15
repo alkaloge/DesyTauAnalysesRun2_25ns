@@ -90,6 +90,7 @@ class analyzer {
 		Float_t         mu_relIso[20];
 		Int_t           jet_count;
 		Int_t           npv;
+		Int_t           npu;
 		Int_t           jets_cleaned[30];
 		Float_t         jet_e[30];
 		Float_t         jet_px[30];
@@ -175,6 +176,7 @@ class analyzer {
 		TBranch        *b_mu_relIso;   //!
 		TBranch        *b_jet_count;   //!
 		TBranch        *b_npv;   //!
+		TBranch        *b_npu;   //!
 		TBranch        *b_jets_cleaned;   //!
 		TBranch        *b_jet_e;   //!
 		TBranch        *b_jet_px;   //!
@@ -239,6 +241,11 @@ class analyzer {
 		virtual Bool_t   Notify();
 		virtual void     Show(Long64_t entry = -1);
 
+/*		void TopHist(Double_t EvWeight){
+
+		histTopPt->Fill(0.,EvWeight);
+		}
+*/
 		void FillHists(int CutIndex, Double_t EvWeight, TLorentzVector  elV, TLorentzVector  muV, TLorentzVector tauV, vector<TLorentzVector>  &JetsV, TLorentzVector  &MetV, double Chimass, double mintermediate, string & Sel, int  mIndex, int eIndex, int  tIndex){
 
 			AllJets_Lepton_noMet.clear();
@@ -267,6 +274,7 @@ class analyzer {
 
 			hWeights[CutIndex]->Fill(EvWeight);
 			hnpv[CutIndex]->Fill(npv,EvWeight);
+			hnpu[CutIndex]->Fill(npu,EvWeight);
 
 
 			//Float_T mT  = double Lester::mTBound(...)
@@ -938,6 +946,7 @@ class analyzer {
 			fChain->SetBranchAddress("mu_relIso", mu_relIso, &b_mu_relIso);
 			fChain->SetBranchAddress("jet_count", &jet_count, &b_jet_count);
 			fChain->SetBranchAddress("npv", &npv, &b_npv);
+			fChain->SetBranchAddress("npu", &npu, &b_npu);
 			fChain->SetBranchAddress("jets_cleaned", &jets_cleaned, &b_jets_cleaned);
   			fChain->SetBranchAddress("njets", &njets, &b_njets);
 			fChain->SetBranchAddress("jet_e", jet_e, &b_jet_e);

@@ -67,9 +67,12 @@ void analyzer::Loop(){
 	CutList.push_back("Trigger SF");
 	CutList.push_back("Lepton SF");
 	CutList.push_back("TauFakeRate");
+	CutList.push_back("Tau-id");
 	CutList.push_back("topPtRwgt");
-	//CutList.push_back("Cleaned jets");
-	CutList.push_back("Jets lt 1 and 0btag");
+	CutList.push_back("TTJets norm");
+	CutList.push_back("WJets norm");
+	CutList.push_back("Jets lt 1 ");
+	CutList.push_back("0btag");
 	CutList.push_back("MT window");
 	CutList.push_back("dR lt 3.5");
 	CutList.push_back("MET gt 30");
@@ -77,18 +80,9 @@ void analyzer::Loop(){
 	CutList.push_back("MET gt 50");
 	CutList.push_back("tau pT gt 50");
 	CutList.push_back("MCTb gt 60");
-//	CutList.push_back("MT gt 130");
 	CutList.push_back("tau pT gt 60");
-
 	CutList.push_back("DZeta gt 30");
-/*	CutList.push_back("MET gt 160");
-	CutList.push_back("dR lt 3. gt 1.5");
-	CutList.push_back("MT gt 250 ");
-	CutList.push_back("InvMass gt 250");
-	//CutList.push_back("dR lt 3. gt 1.5");
-	//CutList.push_back("PtMuonOHT gt 2");
-	//CutList.push_back("HTOsrtMET lt 10");
-*/
+
 	//ChiMass = CHIMASSS;
 	ChiMass = 0.;
 	//cout<<" THE MASS IS ========================= "<<ChiMass<<endl;
@@ -98,8 +92,8 @@ void analyzer::Loop(){
 	 double CFCounter[CutNumb];
 	 for (int i=0;i < CutNumb; i++){
                         CFCounter[i] = 0;
-           if (i>1)     CFCounter_[i] = 0;
-                        iCFCounter[i] = 0;
+			CFCounter_[i] = 0;
+         	        iCFCounter[i] = 0;
         }
 	fChain->GetEntry(0);  
 	string old = datasetName->c_str();
@@ -107,6 +101,7 @@ void analyzer::Loop(){
 		
 	char hist_[100];
 	bool isData = false;
+	bool isTT = false;
 	bool isSignal = false;
 	bool cut_btag = true;
 	bool cut_met30 = true;
@@ -124,9 +119,11 @@ void analyzer::Loop(){
 	cout <<"  "<<cut.c_str()<<endl;
 	char plots_[100];
 	string data = "Single";
+	string tt = "TT_TuneCUETP8M1_13TeV-powheg-pythia8";
 	string signal = "stau";
 	if (string::npos != old.find(data)) isData= true;
 	if (string::npos != old.find(signal)) isSignal= true;
+	if (string::npos != old.find(tt)) isTT= true;
 	
 	if (isSignal) cout<<" YOU HAVE FOUND ITTTTTTTTT "<<endl;
 	if (isData) cout<<" YOU HAVE FOUND a DATA "<<endl;
@@ -136,10 +133,12 @@ void analyzer::Loop(){
 	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/CMSSW_8_0_12/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN","read");
 
 	TH1D * histW = (TH1D*)filein->Get("mutau/histWeightsH");
+	TH1D * histTop ;
+	if (isTT) histTop = (TH1D*)filein->Get("mutau/histTopPt");
+	
 	TH1D * hxsecW = (TH1D*)filein->Get("mutau/xsec");
 	TH1D * CutFlow = (TH1D*)filein->Get("mutau/CutFlowUnW");
 	TFile * file = new TFile("plots.root","recreate");
-	//TFile * file = new TFile(hist_,"update");
 
 	//cout<<"  "<<old<<"  "<<datasetName->c_str()<<"  "<<hist_<<"  "<<CutFlow->GetName()<<"  "<<CutFlow->GetBinContent(1)<<endl;
 		
@@ -149,20 +148,37 @@ void analyzer::Loop(){
 	file->cd(Channel.c_str());
 	//histW->Write();
 	//CutFlow->Draw();
-	SetupHists(CutNumb);
+	float top_w = 1.;
 	Long64_t nentries = fChain->GetEntriesFast();
+	SetupHists(CutNumb);
 
+	Long64_t nbytes = 0, nb = 0;
+/*	if (isTT){
+	TH1D * histTopPt = new TH1D("histTopPt","",1,0,0);
+		for (Long64_t jen=0; jen<nentries;jen++) {
+
+			Long64_t ientry = LoadTree(jen);
+			nb = fChain->GetEntry(jen);  
+//			cout<<"  "<<top_weight<<endl;
+			histTopPt->Fill(0a.,top_weight);
+		}	
+		
+
+			top_w = histTopPt->GetMean();
+	cout<<" there is a TTbar sample and the Mean weight from topPt is "<<top_w<<"  "<<histTopPt->GetSumOfWeights()<<endl;
+	}
+*/
 
 	//for (int ci = 2 ; ci < CutNumb;++ci) { CFCounter_[ci] = 0; CFCounter[ci] = 0;}
 
-	Long64_t nbytes = 0, nb = 0;
 	for (Long64_t jentry=0; jentry<nentries;jentry++) {
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 		float all_weights = 1.;
+//		all_weights *=top_w;
 
-		if ( jentry%100000 ==0 ) cout<<" working for you...processed " <<jentry<<" events from "<<nentries<<" dataset "<<datasetName->c_str()<<" xsec  "<<hxsecW->GetMean()<< endl;
+		if ( jentry%100000 ==0 ) cout<<" working for you...processed " <<jentry<<" events from "<<nentries<<" dataset "<<datasetName->c_str()<<" xsec  "<<hxsecW->GetMean()<<" init weight "<<all_weights<< endl;
 
 		  //   cout<<"  ================================================= "<<fChain->GetTreeNumber()<<"  "<<xsecs<<"  "<<jentry<<" dataset "<<datasetName->c_str()<<endl;
 		/*
@@ -173,7 +189,6 @@ void analyzer::Loop(){
 		}
 		*/
 	
-        //        histWeightsH->Fill(0.,gen_weight);
 		JetsMV.clear();
 		MuMV.clear();
 		ElMV.clear();
@@ -188,14 +203,6 @@ void analyzer::Loop(){
 			METV.SetPy(met_ey);
 		float met = sqrt(met_ex*met_ex + met_ey*met_ey);      
 
-/*		//if (int(jet_count)>0){
-		for ( unsigned int ijj = 0; ijj< jets.size() ; ++ijj) {
-			int jc = jets_cleaned[ijj];
-			JetsV.SetPxPyPzE(jet_px[jc], jet_py[jc], jet_pz[jc], jet_e[jc]);
-			JetsMV.push_back(JetsV);
-		}
-		//}
-*/
 		//cout<<" size "<<JetsMV.size()<<"  "<<gen_weight<<"  "<<jentry<<"  "<<nentries<<"  "<<int(mu_count)<<"  "<<int(muon_index)<<endl;
 	
 
@@ -211,16 +218,18 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 		//cout<<"  "<<all_weight<<endl;
 //		cout<<" e " <<jentry<<" from "<<nentries<<"  weights "<<all_weights<<" same ? "<< gen_weight*trig_weight*pu_weight*top_weight*LSF_weight*TFR_weight <<" PU "<<pu_weight<<" top "<<top_weight<<" LSF "<<LSF_weight<<" TFR "<<TFR_weight<<" gen "<<gen_weight<<" trig  "<<trig_weight<<endl;
 		int iCut = 2;
+
 		
-		if (mu_relIso[0] > 0.1 && !InvertLeptonIso) continue;
-		if (mu_relIso[0] < 0.1 && InvertLeptonIso) continue;
+		if (mu_relIso[0] > 0.15 && !InvertLeptonIso) continue;
+		if (mu_relIso[0] < 0.15 && InvertLeptonIso) continue;
 		//if ( fabs(mu_dxy[muon_index]) > 0.01) continue;
 		//if ( fabs(mu_dz[muon_index]) > 0.01) continue;
 
 		///remove from the all_weight the LSF  + TFR + top +trig_weig
 		all_weights = pu_weight * gen_weight ;
 
-		//if (ta_IsoFlag < 0.5) continue;
+		//if (ta_IsoFlag < 0.5 || ta_relIso[0] < 0.5) continue;
+
 		//if (event_leptonDrTrigger<0.5) continue;
 
 		if ( abs(mu_charge[muon_index]) !=1 ) continue;
@@ -236,7 +245,6 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
-
 
 
 		if (event_secondLeptonVeto >0.5) continue;
@@ -270,13 +278,22 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 
 		double ptTau1 = (double)ta_pt[taus_index];
 		double etaTau1 = (double)ta_eta[taus_index];
-
-	//	all_weights *= TFR_weight;
-		
-		double tfr  = TauFakeRate(ptTau1,etaTau1,channel);
+		//ChargedIso CutBased MVA
+		string WP = "ChargedIso";
+		double tfr  = TauFakeRate(ptTau1,etaTau1,channel,WP);
 	//	cout<<" CHECK THIS GUY HERE TFR_weight "<<TFR_weight<<" tfr "<<tfr<<"  genTau "<<genTauMatched<<endl;
 
 		if (genTauMatched<0.5 && !isData) all_weights *= tfr;
+		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
+
+		string tID="CutBased_Medium";
+		double tauId = TauiD(channel,tID);
+		//if (genTauMatched>0.5 && !isData) all_weights *= tauId;
+		if (genTauMatched>0.5 && !isData) all_weights *= 0.8;
 		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
@@ -290,11 +307,27 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
                 iCFCounter[iCut]++;
 		iCut++;
 
+		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
+
+		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
 		//ta_relIso[0] the tau Iso
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if (njets>0) continue;
+		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
 		if (nbtag>0) continue;
 		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
 		CFCounter[iCut]+= all_weights;
@@ -339,7 +372,6 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
                 iCFCounter[iCut]++;
 		iCut++;
 
-		continue;
 
 		if (met<50.) continue;
 		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
@@ -355,6 +387,7 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
+		continue;
 
 		double mcta = sqrt( 2*mu_pt[muon_index]*ta_pt[taus_index]*(1+cos(mu_phi[muon_index]-ta_phi[taus_index])) );
 		//cout<<"  "<<mcta<<endl;
@@ -383,80 +416,27 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 		iCut++;
 
 	
-		continue;
-
-
-
-
-		if (MT  < 250. ) continue;
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-		
-		 TLorentzVector DiLL = MuV  + TauV;
-		if (DiLL.M()<250.) continue;
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-
-
-		
-
-	
-/*		double HText =sumpT;
-    	        HText += mu_pt[muon_index];
-		double RhT = mu_pt[muon_index]/HText;
-                double PtOHT =  mu_pt[muon_index]/sumpT;
-		double HTOMET  = sumpT/sqrt(METV.Pt());
-		//cout<<" RHT "<< RhT<<endl;
-		
-		if (  fabs(mu_dxy[muon_index])> 0.02) continue;
-		if (  fabs(mu_dz[muon_index])> 0.02) continue;
-		if (met <100) continue;
-		//if (PtOHT<2.) continue;
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-		
-		
-		if (HTOMET > 10.)continue;		
-		FillHists(iCut, all_weights, ElV, MuV, TauV,JetsMV, METV, ChiMass,mIntermediate, Channel, muon_index,electron_index,taus_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-*/
-
-		
-
-
   }
 
 
 
 
 
-	float Lumi = 2320.;
+	float Lumi = 12890.;
 
-	if (isData) Lumi = 1;
+	if (isData) Lumi = 1.;
 
 		 for(int ci = 0; ci < CutNumb; ci++)
                         {
                                 // tfile << CutList[ci]<<"\t & \t"
                                 //          << CFCounter[ci]  <<"\t & \t"<< statUnc[ci] <<"\t & \t"<< iCFCounter[ci] << endl;
                                 		CutFlowUnW->SetBinContent(1+ci,0);
-                        if (CutNumb < 2)       CutFlowUnW->SetBinContent(1+ci,hxsecW->GetMean()*Lumi);
+                        if (CutNumb < 2)       CutFlowUnW->SetBinContent(1+ci,CFCounter_[ci]);
                            else  
  					CutFlowUnW->SetBinContent(1+ci,float(CFCounter[ci]) );
 				
 
-					cout<<" Count "<<ci<<" binContent "<<CutFlow->GetBinContent(1+ci)<<"  CFCounter_ "<<CFCounter_[ci]<<" CFCounter "<<CFCounter[ci]<<" iCFCounter "<<iCFCounter[ci]<<" Name "<<CutFlowUnW->GetXaxis()->GetBinLabel(1+ci)<<" entry  "<<CutFlowUnW->GetBinContent(1+ci)<<" for Lumi " <<Lumi<<"  "<<float (CutFlowUnW->GetBinContent(1+ci))*hxsecW->GetMean()*Lumi/histW->GetSumOfWeights()<<endl;			
+					cout<<" Count "<<ci<<" binContent "<<CutFlowUnW->GetBinContent(1+ci)<<"  CFCounter_ "<<CFCounter_[ci]<<" CFCounter "<<CFCounter[ci]<<" iCFCounter "<<iCFCounter[ci]<<" Name "<<CutFlowUnW->GetXaxis()->GetBinLabel(1+ci)<<" entry  "<<CutFlowUnW->GetBinContent(1+ci)<<" prediction for Lumi " <<Lumi<<"  "<<float (CutFlowUnW->GetBinContent(1+ci))*hxsecW->GetMean()*Lumi/histW->GetSumOfWeights()<<endl;			
 
 }
 
@@ -467,6 +447,7 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 		CutFlowUnW->Write();
 		//histWeightsH->Write();
 		histW->Write();
+	if (isTT) histTop->Write();
 		hxsecW->Write();
 		file->Write();
 		file->Close();

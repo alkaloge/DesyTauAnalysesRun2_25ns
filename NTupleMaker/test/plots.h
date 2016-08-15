@@ -39,7 +39,7 @@ vector<TLorentzVector>  TauMV;
 vector<TLorentzVector>  LeptMV;
 
 
-double TauFakeRate(float pt,float eta, string sel){
+double TauFakeRate(float pt,float eta, string sel,string working_point){
 
 float SF = 1;
 
@@ -101,9 +101,8 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 		if (pt>60 )	    SF = 1.25883;
 	}
 }
-*/
 
-
+///////76x
 if (sel =="mutau" || sel == "eltau"){
 
 if (  fabs(eta) < 0.9 ) 
@@ -132,16 +131,129 @@ if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 )
 	}
 }
 
+*/
 
+//80x MVAid
+if ( (sel =="mutau" || sel == "eltau") && working_point == "MVA"){
 
-return SF;
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 0.955873;
+		if (pt>30 && pt<50) SF = 1.03768;
+		if (pt>50 ) SF = 0.703788;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
 
+		if (pt>20 && pt<30) SF = 1.01357;
+		if (pt>30 && pt<50) SF = 0.937558;
+		if (pt>50 ) SF = 0.892849;
+	}
 
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 0.999444;
+		if (pt>30 && pt<50) SF = 0.830996;
+		if (pt>60) SF = 0.753128;
+	}
 }
 
 
 
 
+// Charged
+if ( (sel =="mutau" || sel == "eltau") && working_point == "ChargedIso" ){
+
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 1.26544;
+		if (pt>30 && pt<50) SF = 1.25239;
+		if (pt>50 ) SF = 1.38857;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.21749;
+		if (pt>30 && pt<50) SF = 1.10979;
+		if (pt>50 ) SF = 1.60393;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.27961;
+		if (pt>30 && pt<50) SF = 1.14411;
+		if (pt>60) SF = 1.2188;
+	}
+}
+
+
+//CutBased
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased" ){
+
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 0.898437;
+		if (pt>30 && pt<50) SF = 0.946704;
+		if (pt>50 ) SF = 0.96842;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.27757;
+		if (pt>30 && pt<50) SF = 1.26811;
+		if (pt>50 ) SF = 0.75345;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.0773;
+		if (pt>30 && pt<50) SF = 1.00049;
+		if (pt>60) SF = 0.820108;
+	}
+}
+
+
+
+
+
+return SF;
+
+}
+
+double TauiD(string sel,string working_point){
+
+float SF = 1;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased_Loose" )
+	SF = 0.81;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased_Medim" )
+	SF = 0.79;
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased_Tight" )
+	SF = 0.79;
+
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Vloose" )
+	SF = 0.83;
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Vloose" )
+	SF= 0.84;
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Medium" )
+	SF = 0.84;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Tight" )
+	SF = 0.83;
+
+if ((sel =="mutau" || sel == "eltau")  && working_point == "MVA_Vtight" )
+	SF = 0.80;
+
+
+
+return SF;
+
+}
 
 float Dzeta(TLorentzVector LV, TLorentzVector muV, TLorentzVector MetV)
 	{
@@ -244,6 +356,8 @@ vector<string> CutList;
 TH1D * histRuns = new TH1D("histRuns","",6000,24000,30000);
 
 TH1D * histWeightsH = new TH1D("histWeightsH","",1,-0.5,0.5);
+
+TH1D * histTopPt = new TH1D("histTopPt","",1,-0.5,0.5);
 
 TH1D * hWeights [CutN];
 

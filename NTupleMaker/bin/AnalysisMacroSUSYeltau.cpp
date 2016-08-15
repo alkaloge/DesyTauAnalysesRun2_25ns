@@ -37,8 +37,6 @@ int main(int argc, char * argv[]) {
   // first argument - config file 
   // second argument - filelist
 
-
-
   // **** configuration
   Config cfg(argv[1]);
   string Channel="eltau";
@@ -47,10 +45,13 @@ int main(int argc, char * argv[]) {
   bool fillplots= false;
   const bool isData = cfg.get<bool>("IsData");
   const bool applyPUreweighting = cfg.get<bool>("ApplyPUreweighting");
+
+
   const bool applyLeptonSF = cfg.get<bool>("ApplyLeptonSF");
   const bool InvertTauIso = cfg.get<bool>("InvertTauIso");
   const bool InvertLeptonIso = cfg.get<bool>("InvertLeptonIso");
   const bool InvertMET = cfg.get<bool>("InvertMET");
+
   // kinematics electrons
   const float ptElectronCut       = cfg.get<float>("ptElectronCuteltau");
   const double ptElectronHighCut  = cfg.get<double>("ptElectronHighCuteltau");
@@ -443,6 +444,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 	bool WithInit = true;
 
+	if (SUSY) WithInit = false;
+
     	TTree * _test = NULL;
 	_test = (TTree*)file_->Get(TString(initNtupleName));
     	if (_test==NULL) WithInit = false;
@@ -470,14 +473,18 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       //histWeightsH->Fill(0.,genweight);
     }
 
+
+
     TTree * _tree = NULL;
     _tree = (TTree*)file_->Get(TString(ntupleName));
+
     if (_tree==NULL) continue;
     Long64_t numberOfEntries = _tree->GetEntries();
     std::cout << "      number of entries in Tree      = " << numberOfEntries << std::endl;
     AC1B analysisTree(_tree);
 
 	if (!isData && !WithInit)
+	//if (!isData)
 		{    
 		for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) 
 			{
@@ -490,14 +497,14 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 			histWeightsH->Fill(0.,analysisTree.genweight);
 			}
 		}
+  	float genweights=1;
 
-    float genweights=1;
+	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
+	genweightsTree->SetBranchAddress("genweight",&genweights);
+
     if(!isData && WithInit) 
       {
 
-	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
-	     
-	genweightsTree->SetBranchAddress("genweight",&genweights);
 	Long64_t numberOfEntriesInit = genweightsTree->GetEntries();
 	for (Long64_t iEntryInit=0; iEntryInit<numberOfEntriesInit; ++iEntryInit) { 
 	  genweightsTree->GetEntry(iEntryInit);
@@ -539,10 +546,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       if (nEvents%50000==0) 
 	cout << "      processed " << nEvents << " events" << endl; 
-      /////////////////////
-      //Good vertex
-      ////////////////////
-      //
       /*
       if (fabs(analysisTree.primvertex_z)>zVertexCut) continue;
       if (analysisTree.primvertex_ndof<ndofVertexCut) continue;
@@ -551,6 +554,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       if (dVertex>dVertexCut) continue;
       if (analysisTree.primvertex_count<2) continue;  
 */
+
       //isData= false;
       bool lumi=false;
       bool CutBasedTauId = false;
@@ -606,8 +610,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  }
 					
 				
-
-
 
 
 
@@ -682,7 +684,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 
 	bool METflag = metFiltersPasses2(analysisTree, metFlags);
-	if (!METflag) continue;
+	if (!METflag && isData) continue;
 
 
       if (!lumi) continue;
@@ -709,33 +711,12 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       METV.SetPx(analysisTree.pfmet_ex);	      
       METV.SetPy(analysisTree.pfmet_ey);
 
-/*
-      for (unsigned int ijj = 0; ijj<analysisTree.pfjet_count; ++ijj) {
-	JetsV.SetPxPyPzE(analysisTree.pfjet_px[ijj], analysisTree.pfjet_py[ijj], analysisTree.pfjet_pz[ijj], analysisTree.pfjet_e[ijj]);
-	JetsMV.push_back(JetsV);
-      } 
-      for (unsigned int imm = 0; imm<analysisTree.muon_count; ++imm) {
-	MuV.SetPtEtaPhiM(analysisTree.muon_pt[imm], analysisTree.muon_eta[imm], analysisTree.muon_phi[imm], muonMass);
-	MuMV.push_back(MuV);
-	//	mu_index=0;
-      }
-      for (unsigned int ie = 0; ie<analysisTree.electron_count; ++ie) {
-	ElV.SetPtEtaPhiM(analysisTree.electron_pt[ie], analysisTree.electron_eta[ie], analysisTree.electron_phi[ie], electronMass);
-	ElMV.push_back(ElV);
-	//	el_index=0;
-      }
-      for (unsigned int itt = 0; itt<analysisTree.tau_count; ++itt) {
-	TauV.SetPtEtaPhiM(analysisTree.tau_pt[itt], analysisTree.tau_eta[itt], analysisTree.tau_phi[itt], tauMass);
-	TauMV.push_back(TauV);
-	//	tau_index=0;
-      }
-*/
 
       if (!isData) 
 	{
 	  if (applyPUreweighting)	 {
-	   /* puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));*/
-		puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
+	    puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));
+	//	puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
 	    weight *=puweight;      
 	    pu_weight = puweight;
 	  }
@@ -803,13 +784,14 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       for (unsigned int it = 0; it<analysisTree.tau_count; ++it) {
 
-        if (analysisTree.tau_decayModeFinding[it]<=0.5) continue;
-        if (analysisTree.tau_pt[it]<ptTauCut) continue;
-        if (fabs(analysisTree.tau_eta[it])>etaTauCut) continue;
-        if (fabs(analysisTree.tau_leadchargedhadrcand_dz[it])>dzTauCut) continue;
-	if (fabs(analysisTree.tau_charge[it]) !=1) continue;
-        taus.push_back(it);
-      }
+	if (analysisTree.tau_pt[it] < ptTauCut ) continue; 
+	if (fabs(analysisTree.tau_eta[it])> etaTauCut) continue;
+	if (analysisTree.tau_decayModeFinding[it]<decayModeFindingNewDMs) continue;
+	if ( fabs(analysisTree.tau_leadchargedhadrcand_dz[it])> leadchargedhadrcand_dz) continue;
+        if ( fabs(analysisTree.tau_charge[it]) != 1 ) continue;
+	  taus.push_back((int)it);
+
+	}
 
 
       if (taus.size()==0) continue;
@@ -829,28 +811,28 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	bool isSingleElectronFilterNameMatch = false;
 	//	bool isElectronTauSingleElectronFilterNameMatch = false;
 	//	bool isElectronTauOverlapElectronMatch = false;
-	unsigned int mIndex  = electrons.at(im);
-	float neutralHadIsoElec = analysisTree.electron_neutralHadIso[mIndex];
-	float photonIsoElec = analysisTree.electron_photonIso[mIndex];
-	float chargedHadIsoElec = analysisTree.electron_chargedHadIso[mIndex];
-	float puIsoElec = analysisTree.electron_puIso[mIndex];
+	unsigned int eIndex  = electrons.at(im);
+	float neutralHadIsoElec = analysisTree.electron_neutralHadIso[eIndex];
+	float photonIsoElec = analysisTree.electron_photonIso[eIndex];
+	float chargedHadIsoElec = analysisTree.electron_chargedHadIso[eIndex];
+	float puIsoElec = analysisTree.electron_puIso[eIndex];
 	if (isIsoR03) {
-	  neutralHadIsoElec = analysisTree.electron_r03_sumNeutralHadronEt[mIndex];
-	  photonIsoElec = analysisTree.electron_r03_sumPhotonEt[mIndex];
-	  chargedHadIsoElec = analysisTree.electron_r03_sumChargedHadronPt[mIndex];
-	  puIsoElec = analysisTree.electron_r03_sumPUPt[mIndex];
+	  neutralHadIsoElec = analysisTree.electron_r03_sumNeutralHadronEt[eIndex];
+	  photonIsoElec = analysisTree.electron_r03_sumPhotonEt[eIndex];
+	  chargedHadIsoElec = analysisTree.electron_r03_sumChargedHadronPt[eIndex];
+	  puIsoElec = analysisTree.electron_r03_sumPUPt[eIndex];
 	}
 	float neutralIsoElec = neutralHadIsoElec + photonIsoElec - 0.5*puIsoElec;
 	neutralIsoElec = TMath::Max(float(0),neutralIsoElec); 
 	float absIsoElec = chargedHadIsoElec + neutralIsoElec;
-	float relIsoElec = absIsoElec/analysisTree.electron_pt[mIndex];
+	float relIsoElec = absIsoElec/analysisTree.electron_pt[eIndex];
 	if (isData)
 	{
 	for (unsigned int iT=0; iT<analysisTree.trigobject_count; ++iT) {
 	  if (analysisTree.trigobject_filters[iT][nMainTrigger]
-	      &&analysisTree.electron_pt[mIndex]>ptElectronHighCut&&
+	      &&analysisTree.electron_pt[eIndex]>ptElectronHighCut&&
 	      analysisTree.trigobject_pt[iT]>SingleElectronTriggerPtCut) { // IsoElec Leg
-	    float dRtrig = deltaR(analysisTree.electron_eta[mIndex],analysisTree.electron_phi[mIndex],
+	    float dRtrig = deltaR(analysisTree.electron_eta[eIndex],analysisTree.electron_phi[eIndex],
 				  analysisTree.trigobject_eta[iT],analysisTree.trigobject_phi[iT]);
 	    if (dRtrig<deltaRTrigMatch) {
 	      isSingleElectronFilterNameMatch = true;
@@ -865,7 +847,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  unsigned int tIndex = taus.at(it);
 
 	  float dR = deltaR(analysisTree.tau_eta[tIndex],analysisTree.tau_phi[tIndex],
-			    analysisTree.electron_eta[mIndex],analysisTree.electron_phi[mIndex]);
+			    analysisTree.electron_eta[eIndex],analysisTree.electron_phi[eIndex]);
 
 	  if (dR<dRleptonsCuteltau) continue;
 
@@ -874,16 +856,17 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  if (!trigMatch) continue;
 	  
 	
-	  float isoTau =1;
+	  float isoTau =1.;
+
 	if (CutBasedTauId){
 	isoTau = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tIndex];
 
-	  if ( (int) mIndex!= (int)el_index) {
+	  if ( (int) eIndex!= (int)el_index) {
 	    if (relIsoElec==isoElecMin) {
-	      if (analysisTree.electron_pt[mIndex]>ptMu) {
+	      if (analysisTree.electron_pt[eIndex]>ptMu) {
 		isoElecMin  = relIsoElec;
-		ptMu = analysisTree.electron_pt[mIndex];
-		el_index = (int)mIndex;
+		ptMu = analysisTree.electron_pt[eIndex];
+		el_index = (int)eIndex;
 		isoTauMin = isoTau;
 		ptTau = analysisTree.tau_pt[tIndex];
 		tau_index = (int)tIndex;
@@ -891,8 +874,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	    }
 	    else if (relIsoElec<isoElecMin) {
 	      isoElecMin  = relIsoElec;
-	      ptMu = analysisTree.electron_pt[mIndex];
-	      el_index = (int)mIndex;
+	      ptMu = analysisTree.electron_pt[eIndex];
+	      el_index = (int)eIndex;
 	      isoTauMin = isoTau;
 	      ptTau = analysisTree.tau_pt[tIndex];
 	      tau_index = (int)tIndex;
@@ -919,13 +902,14 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 	if (!CutBasedTauId){
    isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
+   //isoTau = analysisTree.tau_chargedIsoPtSum[tIndex];
 
-	  if ( (int) mIndex!= (int)el_index) {
+	  if ( (int) eIndex!= (int)el_index) {
 	    if (relIsoElec==isoElecMin) {
-	      if (analysisTree.electron_pt[mIndex]>ptMu) {
+	      if (analysisTree.electron_pt[eIndex]>ptMu) {
 		isoElecMin  = relIsoElec;
-		ptMu = analysisTree.electron_pt[mIndex];
-		el_index = (int)mIndex;
+		ptMu = analysisTree.electron_pt[eIndex];
+		el_index = (int)eIndex;
 		isoTauMin = isoTau;
 		ptTau = analysisTree.tau_pt[tIndex];
 		tau_index = (int)tIndex;
@@ -934,8 +918,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 	    else if (relIsoElec<isoElecMin) {
 	      isoElecMin  = relIsoElec;
-	      ptMu = analysisTree.electron_pt[mIndex];
-	      el_index = (int)mIndex;
+	      ptMu = analysisTree.electron_pt[eIndex];
+	      el_index = (int)eIndex;
 	      isoTauMin = isoTau;
 	      ptTau = analysisTree.tau_pt[tIndex];
 	      tau_index = (int)tIndex;
@@ -960,7 +944,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       }
       }
-      //      std::cout << "mIndex = " << el_index << "   tau_index = " << tau_index << std::endl;
+      //      std::cout << "eIndex = " << el_index << "   tau_index = " << tau_index << std::endl;
       //
       bool TauId = false;
 
@@ -978,10 +962,13 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	{
 		tauPass=
 	  	  analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
+	  	  //analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
 
  
        isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
        ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
+       //isoTau = analysisTree.tau_chargedIsoPtSum[tau_index];
+       //ta_IsoFlag=analysisTree.tau_chargedIsoPtSum[tau_index];
 	}
 
 	if (CutBasedTauId)
@@ -1007,9 +994,15 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCut++;
 
 
-  bool          dilepton_veto;
-  bool          extraelec_veto;
-  bool          extramuon_veto;
+  bool          dilepton_veto=false;
+  bool          extraelec_veto=false;
+  bool          extramuon_veto=false;
+      
+  event_secondLeptonVeto = false;
+      
+  event_thirdLeptonVeto = false;
+      
+  dilepton_veto = false;
 
 
 
@@ -1045,6 +1038,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       vector<unsigned int> e_dielectrons; e_dielectrons.clear(); 
       for (unsigned int im = 0; im<analysisTree.electron_count; ++im) {
 
+      	      if ((int)im==(int)el_index) continue;
+
 	float neutralHadIsoElec = analysisTree.electron_neutralHadIso[im];
 	float photonIsoElec = analysisTree.electron_photonIso[im];
 	float chargedHadIsoElec = analysisTree.electron_chargedHadIso[im];
@@ -1065,10 +1060,19 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	    fabs(analysisTree.electron_dxy[im])<dxyDilepElectronCut&&
 	    fabs(analysisTree.electron_dz[im])<dzDilepElectronCut&&
 	    analysisTree.electron_cutId_veto_Spring15[im]&&
-	    relIsoElec<isoDilepElectronCut)
-	  e_dielectrons.push_back(im);
+	    relIsoElec<isoDilepElectronCut && 
+	    fabs(analysisTree.electron_charge[im]) ==1)
+	{
+	    
+	float dRelectrons = deltaR(analysisTree.electron_eta[el_index],analysisTree.electron_phi[el_index],
+			   analysisTree.electron_eta[im],analysisTree.electron_phi[im]);
 
-	if (int(im)==(int)el_index) continue;
+	    if (dRelectrons>dRDilepVetoCut && (analysisTree.electron_charge[el_index]*analysisTree.electron_charge[im]<0)) 
+	      dilepton_veto = true;
+
+	}
+	 // e_dielectrons.push_back(im);
+
 	if (analysisTree.electron_pt[im]<ptVetoElectronCut) continue;
 	if (fabs(analysisTree.electron_eta[im])>etaVetoElectronCut) continue;
 	if (fabs(analysisTree.electron_dxy[im])>dxyVetoElectronCut) continue;
@@ -1084,6 +1088,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       extraelec_veto = foundExtraElectron;
       extramuon_veto = foundExtraMuon;
 
+      if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
+/*
       dilepton_veto = false;
       if (e_dielectrons.size()>1) {
 	for (unsigned int i1=0; i1<e_dielectrons.size()-1; ++i1) {
@@ -1099,10 +1105,9 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       }
       //      cout << analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index] << endl;
       //      cout << analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index] << endl;
-
+*/
    	event_secondLeptonVeto = dilepton_veto;
-	if (dilepton_veto)  continue;
-
+//	if (dilepton_veto)  continue;
 
 
       CFCounter[iCut]+= weight;
@@ -1110,16 +1115,11 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCFCounter[iCut]++;
       iCut++;
 
-        if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
 //	if (extraelec_veto) continue;
 //	if (extramuon_veto) continue;
 
 
 
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
 
       /////////////////Make sure that the selected electron fired the trigger and it is within a Dr < 0.5
 
@@ -1132,19 +1132,19 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       float trigweight=1.;
 
 
-      float El22EffData = (float)SF_electronTrigger->get_EfficiencyData(double(ptEl1),double(etaEl1));
+      float EffFromData = (float)SF_electronTrigger->get_EfficiencyData(double(ptEl1),double(etaEl1));
       /*float El22EffMC   = (float)SF_electronTrigger->get_EfficiencyMC(double(ptEl1),double(etaEl1));*/
 
      /* if (!isData) {
 	if (El22EffMC>1e-6)
-	  trigweight = El22EffData / El22EffMC;
-	if (!isData &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1")) )  trigweight = El22EffData;
+	  trigweight = EffFromData / El22EffMC;
+	if (!isData &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1")) )  trigweight = EffFromData;
 	weight *= trigweight;
 	trig_weight = trigweight;
       }
 	*/
 
-	if (!isData) trigweight = El22EffData;
+	if (!isData) trigweight = EffFromData;
 	weight *= trigweight;
 	trig_weight = trigweight;
 
@@ -1429,7 +1429,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       }
 
       njets = jets.size();
-	npv = analysisTree.primvertex_count;
+      npv =  analysisTree.primvertex_count;
+      npu = analysisTree.numtruepileupinteractions;
       countjets = jets.size();
       jet_count = jets.size();
       //njetspt20 = jetspt20.size();
@@ -1461,7 +1462,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
   //write out cutflow
   ofstream tfile;
-  // TString outname = argv[argc-1];
   TString outname=argv[2];
   TString textfilename = "cutflow_"+outname+"_"+Channel+"_"+argv[3]+".txt";
   //  tfile.open(textfilename);
@@ -1475,26 +1475,26 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       CutFlowUnW->SetBinContent(1+ci,0);
       CutFlow->SetBinContent(1+ci,0);
       CutFlowUnW->SetBinContent(1+ci,float(CFCounter[ci]) );
-      //CFCounter_->Fill();
 
 
       CFCounter[ci] *= float(XSec*Lumi/( histWeightsH->GetSumOfWeights()));
 
       CutFlow->SetBinContent(1+ci,float(CFCounter[ci]));
 
-      cout << " i "<<ci<<" iCFCounter "<<iCFCounter[ci]<<" CFCounter  "<<CFCounter[ci]<<" CFCounter_ " <<CFCounter_[ci]<<"  "<<XSec*Lumi/( histWeightsH->GetSumOfWeights())<<" UnWBinContent "<<CutFlowUnW->GetBinContent(1+ci)<<" Norm to Lumi Content "<<CutFlow->GetBinContent(1+ci)<<"   "<<CutList[ci]<<endl;   
+      cout << " i "<<ci<<" iCFCounter "<<iCFCounter[ci]<<" CFCounter  "<<CFCounter[ci]<<" CFCounter_ " <<CFCounter_[ci]<<"  "<<XSec*Lumi/( histWeightsH->GetSumOfWeights())<<" UnWBinContent "<<CutFlowUnW->GetBinContent(1+ci)<<" Norm to Lumi Content "<<CutFlow->GetBinContent(1+ci)<<" Cut "<<CutList[ci]<<endl;   
       if (iCFCounter[ci] <0.2) statUnc[ci] =0;
-      //else statUnc[i] = CFCounter[i]/sqrt(iCFCounter[i]);
       else statUnc[ci] = sqrt(CFCounter[ci]);
     }
 
 
+
   std::cout << std::endl;
-  int allEvents = int(inputEventsH->GetEntries());
+  int allEvents = (int)inputEventsH->GetEntries();
   std::cout << "Total number of input events    = " << allEvents << std::endl;
   std::cout << "Total number of events in Tree  = " << nEvents << std::endl;
   std::cout << "Total number of selected events = " << selEvents << std::endl;
   std::cout << std::endl;
+
 
 
 

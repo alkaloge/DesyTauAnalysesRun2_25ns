@@ -33,13 +33,112 @@
 
 
 #include "TGraphAsymmErrors.h"
+  
+using namespace std;
+
+double TauFakeRate(float pt,float eta, string sel,string working_point){
+
+float SF = 1;
+
+//80x MVAid
+
+if ( (sel =="mutau" || sel == "eltau") && working_point == "MVA"){
+
+if (  fabs(eta) < 0.9 )
+        {
+                if (pt>20 && pt<30) SF = 0.940248;
+                if (pt>30 && pt<50) SF = 0.976877;
+                if (pt>50 ) SF = 0.731423;
+        }
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 )
+        {
+
+                if (pt>20 && pt<30) SF = 0.954878;
+                if (pt>30 && pt<50) SF = 0.886304;
+                if (pt>50 ) SF = 0.927535;
+        }
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.1 )
+        {
+
+                if (pt>20 && pt<30) SF = 1.10753;
+                if (pt>30 && pt<50) SF = 0.834906;
+                if (pt>60) SF = 0.910456;
+        }
+if (  fabs(eta) > 2.1 && fabs(eta) < 2.4 )
+        {
+
+                if (pt>20 && pt<30) SF = 0.924539;
+                if (pt>30 && pt<50) SF = 0.809195;
+                if (pt>60) SF = 0.461119;
+        }
+}
+
+
+// Charged
+if ( (sel =="mutau" || sel == "eltau") && working_point == "ChargedIso" ){
+
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 1.26544;
+		if (pt>30 && pt<50) SF = 1.25239;
+		if (pt>50 ) SF = 1.38857;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.21749;
+		if (pt>30 && pt<50) SF = 1.10979;
+		if (pt>50 ) SF = 1.60393;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.27961;
+		if (pt>30 && pt<50) SF = 1.14411;
+		if (pt>60) SF = 1.2188;
+	}
+}
+
+
+//CutBased
+if ((sel =="mutau" || sel == "eltau")  && working_point == "CutBased" ){
+
+if (  fabs(eta) < 0.9 ) 
+	{
+		if (pt>20 && pt<30) SF = 0.898437;
+		if (pt>30 && pt<50) SF = 0.946704;
+		if (pt>50 ) SF = 0.96842;
+	}
+if (  fabs(eta) > 0.9 && fabs(eta) < 1.2 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.27757;
+		if (pt>30 && pt<50) SF = 1.26811;
+		if (pt>50 ) SF = 0.75345;
+	}
+
+if (  fabs(eta) > 1.2 && fabs(eta) < 2.4 ) 
+	{
+
+		if (pt>20 && pt<30) SF = 1.0773;
+		if (pt>30 && pt<50) SF = 1.00049;
+		if (pt>60) SF = 0.820108;
+	}
+}
+
+
+return SF;
+
+}
+
 
 int main(int argc, char * argv[]) {
 
   // first argument - config file 
   // second argument - filelist
 
-  using namespace std;
 
 
   // **** configuration
@@ -148,12 +247,6 @@ int main(int argc, char * argv[]) {
   
   
   
-  
-  
-  
-  
-  
-  
   const string jsonFile = cfg.get<string>("jsonFile");
 
   string cmsswBase = (getenv ("CMSSW_BASE"));
@@ -190,17 +283,30 @@ int main(int argc, char * argv[]) {
   CutList.clear();
   CutList.push_back("No cut");
   CutList.push_back("No cut after PU");
+  CutList.push_back("topPtReweighting");
+  CutList.push_back("METFilters");
   CutList.push_back("Trigger");
-  CutList.push_back("$ $>$1 IsoMu$");
-  CutList.push_back("$Mu in dR$<$0.5$");
-  CutList.push_back("$ Loose tau $");
-  CutList.push_back("$ ==2 LoosePFJets");
-  CutList.push_back("$ dPhi $>2$ , Sum $<$ 0.2, MT>50");
+  CutList.push_back("mu");
+  CutList.push_back("tau");
+  CutList.push_back("$mu-tau OS");
+  CutList.push_back("Trigger eff");
+  CutList.push_back("LSF");
+  CutList.push_back("gt 0 jets");
+  CutList.push_back("Loose/Tight");
+  CutList.push_back("MET");
+  CutList.push_back("MT");
+  CutList.push_back("DeltaPhi");
+  CutList.push_back("Ratio");
 
   int CutNumb = int(CutList.size());
 
-  for(int cj = 0; cj < CutNumb; cj++)     
-    CutFlow->GetXaxis()->SetBinLabel(cj+1,CutList[cj].c_str());
+  TH1D *CutFlowUnWLoose= new TH1D("CutFlowUnWLoose","Cut Flow",CutN,1,CutN+1);
+  TH1D *CutFlowUnWTight= new TH1D("CutFlowUnWTight","Cut Flow",CutN,1,CutN+1);
+
+  for(int cj = 0; cj < CutNumb; cj++)    {
+    CutFlowUnWLoose->GetXaxis()->SetBinLabel(cj+1,CutList[cj].c_str());
+    CutFlowUnWTight->GetXaxis()->SetBinLabel(cj+1,CutList[cj].c_str());
+  }
 
   xs=1;fact=1;fact2=1;
   unsigned int RunMin = 9999999;
@@ -316,6 +422,8 @@ int main(int argc, char * argv[]) {
   TH1D * histWeightsSkimmedH = new TH1D("histWeightsSkimmedH","",1,-0.5,0.5);
   TH1D *hnpv = new TH1D ("hnpv","npv ",100,-0.5,99.5);; 
   TH1D *hnpu = new TH1D ("hnpu","npu ",100,-0.5,99.5);;
+  TH1D *hnpvS = new TH1D ("hnpvS","npv ",100,-0.5,99.5);; 
+  TH1D *hnpuS = new TH1D ("hnpuS","npu ",100,-0.5,99.5);;
 
   TH1D * hMT = new TH1D("hMT","",20,0,200);
   TH1D * hRatioSum = new TH1D("hRatioSum","",10,0,1);
@@ -330,39 +438,48 @@ int main(int argc, char * argv[]) {
   TH1D * hMTCut2L = new TH1D("hMTCut2L","",20,0,200);
   TH1D * hMTCut3L = new TH1D("hMTCut3L","",20,0,200);
   TH1D * hMTCut4L = new TH1D("hMTCut4L","",20,0,200);
+  TH1D * hMTCutTFRL = new TH1D("hMTCutTFRL","",20,0,200);
   TH1D * hMTCut1T = new TH1D("hMTCut1T","",20,0,200);
   TH1D * hMTCut2T = new TH1D("hMTCut2T","",20,0,200);
   TH1D * hMTCut3T = new TH1D("hMTCut3T","",20,0,200);
   TH1D * hMTCut4T = new TH1D("hMTCut4T","",20,0,200);
+  TH1D * hMTCutTFRT = new TH1D("hMTCutTFRT","",20,0,200);
 
   TH1D * hRatioSum1L = new TH1D("hRatioSum1L","",10,0,1);
   TH1D * hRatioSum2L = new TH1D("hRatioSum2L","",10,0,1);
   TH1D * hRatioSum3L = new TH1D("hRatioSum3L","",10,0,1);
   TH1D * hRatioSum4L = new TH1D("hRatioSum4L","",10,0,1);
+  TH1D * hRatioSumTFRL = new TH1D("hRatioSumTFRL","",10,0,1);
   TH1D * hRatioSum1T = new TH1D("hRatioSum1T","",10,0,1);
   TH1D * hRatioSum2T = new TH1D("hRatioSum2T","",10,0,1);
   TH1D * hRatioSum3T = new TH1D("hRatioSum3T","",10,0,1);
   TH1D * hRatioSum4T = new TH1D("hRatioSum4T","",10,0,1);
+  TH1D * hRatioSumTFRT = new TH1D("hRatioSumTFRT","",10,0,1);
 
   TH1D * hDPhiCut1L = new TH1D("hDPhiCut1L","",70,0,3.5);
   TH1D * hDPhiCut2L = new TH1D("hDPhiCut2L","",70,0,3.5);
   TH1D * hDPhiCut3L = new TH1D("hDPhiCut3L","",70,0,3.5);
   TH1D * hDPhiCut4L = new TH1D("hDPhiCut4L","",70,0,3.5);
+  TH1D * hDPhiCutTFRL = new TH1D("hDPhiCutTFRL","",70,0,3.5);
   TH1D * hDPhiCut1T = new TH1D("hDPhiCut1T","",70,0,3.5);
   TH1D * hDPhiCut2T = new TH1D("hDPhiCut2T","",70,0,3.5);
   TH1D * hDPhiCut3T = new TH1D("hDPhiCut3T","",70,0,3.5);
   TH1D * hDPhiCut4T = new TH1D("hDPhiCut4T","",70,0,3.5);
+  TH1D * hDPhiCutTFRT = new TH1D("hDPhiCutTFRT","",70,0,3.5);
   TH1D * hMETCut1L = new TH1D("hMETCut1L","",10,0,200);
   TH1D * hMETCut2L = new TH1D("hMETCut2L","",10,0,200);
   TH1D * hMETCut3L = new TH1D("hMETCut3L","",10,0,200);
   TH1D * hMETCut4L = new TH1D("hMETCut4L","",10,0,200);
+  TH1D * hMETCutTFRL = new TH1D("hMETCutTFRL","",10,0,200);
   TH1D * hMETCut1T = new TH1D("hMETCut1T","",10,0,200);
   TH1D * hMETCut2T = new TH1D("hMETCut2T","",10,0,200);
   TH1D * hMETCut3T = new TH1D("hMETCut3T","",10,0,200);
   TH1D * hMETCut4T = new TH1D("hMETCut4T","",10,0,200);
+  TH1D * hMETCutTFRT = new TH1D("hMETCutTFRT","",10,0,200);
 
   TH1D * hLooseIndex = new TH1D("hLooseIndex","",5,0,5);
   TH1D * hTightIndex = new TH1D("hTightIndex","",5,0,5);
+
   /*
     int nPtBins = 5;
     float ptBins[6] = {19,30,40,50,60,1000};
@@ -394,19 +511,20 @@ int main(int argc, char * argv[]) {
     //"PtGt60"};//,		       "Pt100to150",		       "Pt150to200",		        "PtGt200"};
 
 
-const    int nEtaBins = 3;
-    float etaBins[4] = {0,0.9,1.2,2.4}; 
+const    int nEtaBins = 4;
+    float etaBins[5] = {0,0.9,1.2,2.1, 2.4}; 
 
-    TString EtaBins[3] = {"EtaLt0p9",
+    TString EtaBins[4] = {"EtaLt0p9",
     "Eta0p9to1p2",
-    "EtaGt1p2"};
+    "Eta1p2to2p1",
+    "EtaGt2p1"};
 		
 
 
 
   const int nCuts = 4;
 
-  TString Cuts[4] = {"Ratio","mT","DPhi","All"};
+  TString Cuts[4] = {"MET","mT","DPhi","All"};
   /////first stands for the Eta bin, second array for the cut 
   TH1D * FakeRatePtIncLoose[nEtaBins][nCuts];
   TH1D * FakeRatePtIncTight[nEtaBins][nCuts];
@@ -446,17 +564,20 @@ const    int nEtaBins = 3;
   int selEventsAllMuons = 0;
   int selEventsIdMuons = 0;
   int selEventsIsoMuons = 0;
-  int iCut=0;
-  double CFCounter[CutNumb];
+  int iCutL=0;
+  int iCutT=0;
+  double LooseCFCounter[CutNumb];
+  double TightCFCounter[CutNumb];
   double statUnc[CutNumb];
   int iCFCounter[CutNumb];
   for (int i=0;i < CutNumb; i++){
-    CFCounter[i] = 0;
+  LooseCFCounter[i] = 0;
+  TightCFCounter[i] = 0;
     iCFCounter[i] = 0;
     //statUnc[i] =0;
   }
   bool lumi=false;
-  bool CutBasedTauId = false;
+  bool CutBasedTauId = true;
 
 
   std::string dummy;
@@ -531,26 +652,22 @@ const    int nEtaBins = 3;
       analysisTree.GetEntry(iEntry);
       nEvents++;
 
-      iCut = 0;
+      iCutT = 0;
+      iCutL = 0;
 
 
       //std::cout << "      number of entries in Tree = " << numberOfEntries <<" starting weight "<<weight<< std::endl;
 
       if (nEvents%50000==0) 
 	cout << "      processed " << nEvents << " events" << endl; 
-      //nominator=0;denominator=0;
 
-
-      if (fabs(analysisTree.primvertex_z)>zVertexCut) continue;
-      if (analysisTree.primvertex_ndof<ndofVertexCut) continue;
-      double dVertex = (analysisTree.primvertex_x*analysisTree.primvertex_x+
-			analysisTree.primvertex_y*analysisTree.primvertex_y);
-      if (dVertex>dVertexCut) continue;
-      if (analysisTree.primvertex_count<2) continue;  
-
-      //isData= false;
       bool lumi=false;
 
+
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
 
       if (!isData )  { 
 
@@ -560,13 +677,18 @@ const    int nEtaBins = 3;
 	//cout<<"  weight from init "<<genweights<< "  "<<analysisTree.genweight<<"  "<<weight<<endl;
 
 
-	if (!isData && applyPUreweighting)	 {
+	if (applyPUreweighting)	 {
 	  puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));
 	  weight *=puweight; 
 	  //pu_weight = puweight;
 	}
 
       }
+
+      LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
 
       if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
 	{
@@ -583,7 +705,7 @@ const    int nEtaBins = 3;
 
 	  }
 
-	  if (topPt>0.&&antitopPt>0.) {
+	  if (topPt>0.&& antitopPt>0. && !isData) {
 	    topptweight = topPtWeight(topPt,antitopPt);
 	    weight *= topptweight;
 	    top_weight = topptweight;
@@ -594,7 +716,11 @@ const    int nEtaBins = 3;
       histTopPt->Fill(0.,topptweight);
 
 	}
-	 
+
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
 
       if (isData)  {
 	XSec = 1.;
@@ -671,23 +797,25 @@ const    int nEtaBins = 3;
 	// metFlags.push_back("Flag_HBHENoiseFilter");
 	// metFlags.push_back("Flag_HBHENoiseIsoFilter");
 
-
+	
          metFlags.push_back("Flag_HBHENoiseFilter");
          metFlags.push_back("Flag_HBHENoiseIsoFilter");
          metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
          metFlags.push_back("Flag_goodVertices");
-//if (isData)
-	metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
+	 metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
         // metFlags.push_back("Flag_METFilters");
          metFlags.push_back("Flag_eeBadScFilter");
 
 
 
-
 	bool METflag = metFiltersPasses2(analysisTree, metFlags);
-	if (!METflag) continue;
+	if (!METflag && isData) continue;
 
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
 
 
 
@@ -727,6 +855,10 @@ const    int nEtaBins = 3;
 	return(-1);
       }
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
       /////now clear the Mu.El.Jets again to fill them again after cleaning
 
       vector<int> muons; muons.clear();
@@ -744,6 +876,10 @@ const    int nEtaBins = 3;
       }
       if (muons.size()==0) continue;
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
       vector<int> taus; taus.clear();
       for (unsigned int it = 0; it<analysisTree.tau_count; ++it) {
 
@@ -759,6 +895,10 @@ const    int nEtaBins = 3;
       if (taus.size()==0)  continue;
 
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
 
       int tau_index = -1;
       int mu_index = -1;
@@ -865,8 +1005,8 @@ if (CutBasedTauId){
 }	 
 
 if (!CutBasedTauId){
-   //isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
-   isoTau = analysisTree.tau_chargedIsoPtSum[tIndex];
+   isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex];
+   //isoTau = analysisTree.tau_chargedIsoPtSum[tIndex];
 
           if (int(mIndex)!=mu_index) {
             if (relIsoMu==isoMuMin) {
@@ -915,6 +1055,7 @@ if (!CutBasedTauId){
 
       if (tau_index<0) continue;
       if (mu_index<0) continue;
+
       //      std::cout << "Ok4 " << std::endl;
       bool isLoose = false;
       unsigned int tau_loose=-1;
@@ -934,6 +1075,10 @@ if (!CutBasedTauId){
 				analysisTree.muon_eta[(int)mu_index],analysisTree.muon_phi[(int)mu_index]);
 	if (dRmutau < 0.5) continue;
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
 
 ///////////////Trigger weight 
       double ptMu1 = (double)analysisTree.muon_pt[mu_index];
@@ -956,6 +1101,11 @@ if (!CutBasedTauId){
 	if (!isData) trigweight = EffFromData;
 	weight *= trigweight;
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
+
 	///LSF 
       if (!isData && applyLeptonSF) {
 
@@ -967,6 +1117,10 @@ if (!CutBasedTauId){
 	weight *= IdIsoSF_mu1;
       }
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
  ////////////////////////////// now check if it is also Tight
  	if (isLoose) denominator++;
 
@@ -974,13 +1128,13 @@ if (!CutBasedTauId){
 
        if (!CutBasedTauId){
 		isTight=
-	  	  //analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
-	  	  analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
+	  	  analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index] > 0.5;
+	  	  //analysisTree.tau_chargedIsoPtSum[tau_index] < 0.8;
 
  
-       //isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
+       isoTau = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index];
        //ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
-       isoTau = analysisTree.tau_chargedIsoPtSum[tau_index];
+       //isoTau = analysisTree.tau_chargedIsoPtSum[tau_index];
 
 	 }
 
@@ -1020,6 +1174,10 @@ if (!CutBasedTauId){
 
       if (countjets==0) continue;
 
+    LooseCFCounter[iCutL]+= weight;
+      TightCFCounter[iCutT]+= weight;
+      iCutL++;
+      iCutT++;
       hnJets->Fill(countjets,weight);
       hIsoMuSel->Fill(isoMuMin,weight);
 
@@ -1028,8 +1186,11 @@ if (!CutBasedTauId){
 
 
 
-      if (isLoose) hLooseIndex->Fill((int)tau_loose,weight);
-      if (isTight) hTightIndex->Fill((int)tau_tight,weight);
+      if (isLoose) { hLooseIndex->Fill((int)tau_loose,weight);
+	}
+      if (isTight) { hTightIndex->Fill((int)tau_tight,weight);
+	}
+
       //	if ((int)tau_tight != (int)tau_loose) continue; ////require that the tau that is identified a loose is the same that is the tight one
 
 
@@ -1069,8 +1230,25 @@ if (!CutBasedTauId){
       hMT->Fill(MT,weight);
       hDPhi->Fill(dPhiW, weight);
       hMET->Fill(met, weight);
-      hnpu->Fill(analysisTree.primvertex_count,weight);
-      hnpv->Fill(analysisTree.numtruepileupinteractions,weight);
+      hnpv->Fill(analysisTree.primvertex_count,weight);
+      hnpu->Fill(analysisTree.numtruepileupinteractions,weight);
+
+      bool isTauMatched = false;
+      if (!isData){
+	TLorentzVector genTauV;  
+
+	for (unsigned int gt = 0 ; gt < analysisTree.gentau_count;++gt){
+
+	 // genTauV.SetXYZT(0.,0.,0.,0.);
+	  genTauV.SetXYZT(analysisTree.gentau_px[gt], analysisTree.gentau_py[gt], analysisTree.gentau_pz[gt], analysisTree.gentau_e[gt]);
+
+
+	  double Drr=deltaR(analysisTree.tau_eta[tau_loose],analysisTree.tau_phi[tau_loose],
+			    genTauV.Eta(), genTauV.Phi());
+	  if (Drr < 0.2) isTauMatched = true;
+
+	}
+      }//!isData
 
 
 
@@ -1088,9 +1266,15 @@ if (!CutBasedTauId){
       //FakeRatePt[etaBin][ptBin]->Fill(analysisTree.tau_pt[tau_loose],weight);
 
       bool MTb = (MT>60 && MT<120);
+      double ptTau1 = (double)ta_pt[tau_loose];
+      double etaTau1 = (double)ta_eta[tau_loose];
+      string WP = "MVA";
+      double tfr  = TauFakeRate(ptTau1,etaTau1,Channel,WP);
       if (isLoose)
 
       {
+      LooseCFCounter[iCutL]+= weight;
+      iCutL++;
 	      if (met>40){
 
 	    FakeRatePtIncLoose[etaBin][0]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1098,6 +1282,8 @@ if (!CutBasedTauId){
 	    hMTCut1L->Fill(MT,weight);
 	    hDPhiCut1L->Fill(dPhiW, weight);
 	    hMETCut1L->Fill(met, weight);
+      LooseCFCounter[iCutL]+= weight;
+      iCutL++;
 
 	  if (MTb ){ 
 	    FakeRatePtIncLoose[etaBin][1]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1106,6 +1292,8 @@ if (!CutBasedTauId){
 	    hDPhiCut2L->Fill(dPhiW, weight);
 	    hMETCut2L->Fill(met, weight);
 
+      LooseCFCounter[iCutL]+= weight;
+      iCutL++;
 
 	    if (dPhiW > 2.5){
 	    FakeRatePtIncLoose[etaBin][2]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1113,6 +1301,9 @@ if (!CutBasedTauId){
 	    hMTCut3L->Fill(MT,weight);
 	    hDPhiCut3L->Fill(dPhiW, weight);
 	    hMETCut3L->Fill(met, weight);
+      LooseCFCounter[iCutL]+= weight;
+      iCutL++;
+
 	if (RatioSums < 0.2 ) {
 	    FakeRatePtIncLoose[etaBin][3]->Fill(analysisTree.tau_pt[tau_loose],weight);
 	    hRatioSum4L->Fill(RatioSums,weight);
@@ -1120,6 +1311,16 @@ if (!CutBasedTauId){
 	    hDPhiCut4L->Fill(dPhiW, weight);
 	    hMETCut4L->Fill(met, weight);
 
+      LooseCFCounter[iCutL]+= weight;
+      iCutL++;
+/////////// corrected for TFR
+//
+	if (isTauMatched || isData){
+	    hRatioSumTFRL->Fill(RatioSums,tfr*weight);
+	    hMTCutTFRL->Fill(MT,tfr*weight);
+	    hDPhiCutTFRL->Fill(dPhiW, tfr*weight);
+	    hMETCutTFRL->Fill(met, tfr*weight);
+		}
 
 	      }//met<80
 
@@ -1133,6 +1334,8 @@ if (!CutBasedTauId){
       if (isTight) 
 
 	{	
+      TightCFCounter[iCutT]+= weight;
+      iCutT++;
 
 		if (met>40){
 	    FakeRatePtIncTight[etaBin][0]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1141,6 +1344,8 @@ if (!CutBasedTauId){
 	    hDPhiCut1T->Fill(dPhiW, weight);
 	    hMETCut1T->Fill(met, weight);
 
+      TightCFCounter[iCutT]+= weight;
+      iCutT++;
 
 	    if (MTb ){ 
 	    FakeRatePtIncTight[etaBin][1]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1148,6 +1353,9 @@ if (!CutBasedTauId){
 	    hMTCut2T->Fill(MT,weight);
 	    hDPhiCut2T->Fill(dPhiW, weight);
 	    hMETCut2T->Fill(met, weight);
+    
+      TightCFCounter[iCutT]+= weight;
+      iCutT++;
 
 	      if (dPhiW > 2.5){
 	    FakeRatePtIncTight[etaBin][2]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1155,6 +1363,10 @@ if (!CutBasedTauId){
 	    hMTCut3T->Fill(MT,weight);
 	    hDPhiCut3T->Fill(dPhiW, weight);
 	    hMETCut3T->Fill(met, weight);
+
+      TightCFCounter[iCutT]+= weight;
+      iCutT++;
+
 	  if (RatioSums < 0.2 ) {
 
 	    FakeRatePtIncTight[etaBin][3]->Fill(analysisTree.tau_pt[tau_loose],weight);
@@ -1162,7 +1374,16 @@ if (!CutBasedTauId){
 	    hMTCut4T->Fill(MT,weight);
 	    hDPhiCut4T->Fill(dPhiW, weight);
 	    hMETCut4T->Fill(met, weight);
+
+      TightCFCounter[iCutT]+= weight;
+      iCutT++;
       
+	if (isTauMatched || isData){
+	    hRatioSumTFRT->Fill(RatioSums,tfr*weight);
+	    hMTCutTFRT->Fill(MT,tfr*weight);
+	    hDPhiCutTFRT->Fill(dPhiW, tfr*weight);
+	    hMETCutTFRT->Fill(met, tfr*weight);
+		}
 
 
 		}//met<80
@@ -1193,8 +1414,10 @@ if (!CutBasedTauId){
 
   for(int ci = 0; ci < CutNumb; ci++)
     {
-      CutFlow->SetBinContent(1+ci,0);
-      CutFlow->SetBinContent(1+ci,float(CFCounter[ci]) );
+      CutFlowUnWLoose->SetBinContent(1+ci,0);
+      CutFlowUnWTight->SetBinContent(1+ci,0);
+      CutFlowUnWLoose->SetBinContent(1+ci,float(LooseCFCounter[ci]) );
+      CutFlowUnWTight->SetBinContent(1+ci,float(TightCFCounter[ci]) );
 
     }
 
@@ -1210,12 +1433,13 @@ if (!CutBasedTauId){
   histWeightsH->Write();
   histTopPt->Write();
   hnJets->Write();
+  CutFlowUnWTight->Write();
+  CutFlowUnWLoose->Write();
   file->Write();
   file->Close();
 
   delete file;
 
 }
-
 
 

@@ -1468,6 +1468,30 @@ if (!CutBasedTauId){
       if (!isData){
 	TLorentzVector genTauV;  
 	TLorentzVector genLepV;  
+	
+	genTauMatched =false;
+	genLeptonMatched = false;
+	genLeptonMatchedPromptEl = false;
+	genLeptonMatchedPromptMu = false;
+	genLeptonMatchedPromptTau = false;
+	genElMatchedToTauDecay = false;
+	genMuMatchedToTauDecay = false;
+	genTauMatchedToTauDecay = false;
+	genElMatchedHadrDecay = false;
+	genMuMatchedHadrDecay = false;
+	genTauMatchedHadrDecay = false;
+	genLeptonMatchedGluon = false;
+	genLeptonMatchedHFQ = false;
+	genLeptonMatchedLFQ = false;
+	matchedTauToPromptEl = false;
+	matchedTauToPromptMu = false;
+	matchedTauToPromptTau = false;
+	matchedTauToTauDecEl = false;
+	matchedTauToTauDecMu = false;
+	matchedTauToTauDecTau = false;
+	matchedTauToElHadronDec = false;
+	matchedTauToMuHadronDec = false;
+	matchedTauToTauHadronDec = false;
 
 	for (unsigned int gt = 0 ; gt < analysisTree.gentau_count; ++gt){
 
@@ -1479,14 +1503,14 @@ if (!CutBasedTauId){
 			    genTauV.Eta(), genTauV.Phi());
 
 
-	  if (Drr < 0.2 && ( analysisTree.gentau_isPrompt[gt] > 0.5  || analysisTree.gentau_isTauDecayProduct[gt] > 0.5 ) && genTauV.Pt() > 15. ) genTauMatched = true;
+	  if (Drr < 0.2 && ( analysisTree.gentau_isPrompt[gt] > 0.5  ) && genTauV.Pt() > 15. ) genTauMatched = true;
 
 	}
       
       
 	  for (unsigned int igen=0; igen<analysisTree.genparticles_count; ++igen) {
 
-      		  if ( (abs(analysisTree.genparticles_pdgid[igen])==11 || abs(analysisTree.genparticles_pdgid[igen])==13 || abs(analysisTree.genparticles_pdgid[igen])==15)){
+      		  if ( (abs(analysisTree.genparticles_pdgid[igen])==11 || abs(analysisTree.genparticles_pdgid[igen])==13 || abs(analysisTree.genparticles_pdgid[igen])==15 ||  abs(analysisTree.genparticles_pdgid[igen])<6 ||  abs(analysisTree.genparticles_pdgid[igen])==21)){
 
 	  genLepV.SetXYZT(analysisTree.genparticles_px[igen], analysisTree.genparticles_py[igen], analysisTree.genparticles_pz[igen], analysisTree.genparticles_e[igen]);
 
@@ -1496,29 +1520,23 @@ if (!CutBasedTauId){
 
 
 
-	double DrTauLepton=deltaR(analysisTree.tau_eta[tau_index],analysisTree.tau_phi[tau_index],
+	double DrTauLepton=deltaR(analysisTree.tau_eta[mu_index],analysisTree.tau_phi[mu_index],
 			  genLepV.Eta(),genLepV.Phi());
 
 		if (Drl < 0.2 && genLepV.Pt() > 8){
-if ( abs(analysisTree.genparticles_pdgid[igen])==13)
-
-cout<<analysisTree.genparticles_pdgid[igen]<<" isDirectHadronDecayProduct "<<analysisTree.genparticles_isDirectHadronDecayProduct[igen]<<" isTauDecay "<<analysisTree.genparticles_isTauDecayProduct[igen]<<" isDirectTau  "<<analysisTree.genparticles_isDirectTauDecayProduct[igen]<<"  isPrompt  "<<analysisTree.genparticles_isPrompt[igen]<<"  isDecayeLepton "<<analysisTree.genparticles_isDecayedLeptonHadron[igen]<<endl;
+//if ( abs(analysisTree.genparticles_pdgid[igen])==13)
+//cout<<analysisTree.genparticles_pdgid[igen]<<" isDirectPromptTauDecayProduct "<<analysisTree.genparticles_isDirectPromptTauDecayProduct[igen]<<" isTauDecay "<<analysisTree.genparticles_isTauDecayProduct[igen]<<" isDirectTau  "<<analysisTree.genparticles_isDirectTauDecayProduct[igen]<<"  isPrompt  "<<analysisTree.genparticles_isPrompt[igen]<<"  isDecayeLepton "<<analysisTree.genparticles_isDecayedLeptonHadron[igen]<<" do I have a genTau ?  "<<genTauMatched<<endl;
 
 		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.genparticles_isPrompt[igen] > 0.5) genLeptonMatchedPromptEl = true;
 		if ( abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.genparticles_isPrompt[igen] > 0.5) genLeptonMatchedPromptMu = true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==15 && analysisTree.genparticles_isPrompt[igen] > 0.5) genLeptonMatchedPromptTau = true;
 
-		if (abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.gentau_isDirectPromptTauDecayProduct[igen] > 0.5 ) genElMatchedToTauDecay = true;
-		//if (abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.gentau_isDirectPromptTauDecayProduct[igen] > 0.5 ) genMuMatchedToTauDecay = true;
-		if (abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.gentau_isTauDecayProduct[igen] > 0.5 ) genMuMatchedToTauDecay = true;
-		if (abs(analysisTree.genparticles_pdgid[igen])==15 && analysisTree.gentau_isDirectPromptTauDecayProduct[igen] > 0.5 ) genTauMatchedToTauDecay = true;
+		if (abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.genparticles_isDirectPromptTauDecayProduct[igen] > 0.5 ) genElMatchedToTauDecay = true;
+		if (abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.genparticles_isDirectPromptTauDecayProduct[igen] > 0.5 ) genMuMatchedToTauDecay = true;
 		
-		if (abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.gentau_isDirectHadronDecayProduct[igen] > 0.5 ) genElMatchedHadrDecay = true;
-		if (abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.gentau_isDirectHadronDecayProduct[igen] > 0.5 ) genMuMatchedHadrDecay = true;
-		if (abs(analysisTree.genparticles_pdgid[igen])==15 && analysisTree.gentau_isDirectHadronDecayProduct[igen] > 0.5 ) genTauMatchedHadrDecay = true;
+		if (abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5 ) genElMatchedHadrDecay = true;
+		if (abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5 ) genMuMatchedHadrDecay = true;
 		
 		if ( (abs(analysisTree.genparticles_pdgid[igen])==1 || abs(analysisTree.genparticles_pdgid[igen])==5) && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5) genLeptonMatchedHFQ = true;
-	
 		if ( (abs(analysisTree.genparticles_pdgid[igen])==2 || abs(analysisTree.genparticles_pdgid[igen])==3 || abs(analysisTree.genparticles_pdgid[igen])==4) && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5) genLeptonMatchedLFQ = true;
 		if ( (abs(analysisTree.genparticles_pdgid[igen])==21 ) && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5) genLeptonMatchedGluon = true;
 
@@ -1531,13 +1549,10 @@ cout<<analysisTree.genparticles_pdgid[igen]<<" isDirectHadronDecayProduct "<<ana
 
 		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.genparticles_isPrompt[igen] > 0.5 ) matchedTauToPromptEl = true;
 		if ( abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.genparticles_isPrompt[igen] > 0.5 ) matchedTauToPromptMu = true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==15 && analysisTree.genparticles_isPrompt[igen] > 0.5 ) matchedTauToPromptTau = true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.gentau_isDirectPromptTauDecayProduct[igen] > 0.5 ) matchedTauToTauDecEl = true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.gentau_isDirectPromptTauDecayProduct[igen] > 0.5 ) matchedTauToTauDecMu = true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==15 && analysisTree.gentau_isDirectPromptTauDecayProduct[igen] > 0.5 ) matchedTauToTauDecTau = true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.gentau_isDirectHadronDecayProduct[igen] > 0.5 ) matchedTauToElHadronDec= true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.gentau_isDirectHadronDecayProduct[igen] > 0.5 ) matchedTauToMuHadronDec= true;
-		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.gentau_isDirectHadronDecayProduct[igen] > 0.5 ) matchedTauToTauHadronDec= true;
+		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.genparticles_isDirectPromptTauDecayProduct[igen] > 0.5 ) matchedTauToTauDecEl = true;
+		if ( abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.genparticles_isDirectPromptTauDecayProduct[igen] > 0.5 ) matchedTauToTauDecMu = true;
+		if ( abs(analysisTree.genparticles_pdgid[igen])==11 && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5 ) matchedTauToElHadronDec= true;
+		if ( abs(analysisTree.genparticles_pdgid[igen])==13 && analysisTree.genparticles_isDirectHadronDecayProduct[igen] > 0.5 ) matchedTauToMuHadronDec= true;
 			}
 		}//loop for gen 11 13 15
       

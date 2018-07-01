@@ -2,6 +2,7 @@
 #define NTupleMakerFunctions_h
 
 #include "TMath.h"
+#include "TLorentzVector.h"
 #include "DesyTauAnalyses/NTupleMaker/interface/Config.h"
 //#include "DesyTauAnalyses/NTupleMaker/interface/AC1B.h"
 
@@ -31,6 +32,8 @@ double mcy(const double v1[4],const double v2[4]
 double mcx(const double v1[4],const double v2[4]
                      ,const double vds[4],const double ptm[2]);
 
+//double SMin(TLorentzVector a, TLorentzVector b
+  //                   , double met, double mass);
 // private:
 
   double m_mctecm, m_mctehat, m_pb;
@@ -101,6 +104,20 @@ double cosRestFrame(TLorentzVector boost, TLorentzVector vect) {
   double cosinus = prod/(modBeta*modVect);
 
   return cosinus;
+
+}
+
+double cosAngle(TLorentzVector v1, TLorentzVector v2) {
+
+  TLorentzVector cms = v1 + v2;
+
+  cms.Boost( -cms.BoostVector() );
+
+  double cosA =-999;
+  if (v1.Pt()>0 && v2.Pt()>0) cosA = cms.CosTheta();
+ 
+  return cosA;
+
 
 }
 
@@ -471,6 +488,29 @@ double mcy(const double v1[4],const double v2[4]
   }
 }
 
+
+double SMin(TLorentzVector a, TLorentzVector b
+                     ,double met,double mass){
+
+
+//double smin_ =   sqrt ( (a.E()*a.E()+ b.E()+b.E()) -  ( a.Pz()*a.Pz() + b.Pz()*b.Pz()) ) + sqrt( mass*mass + met*met);
+
+//double partA =    (a.E()*a.E()+ b.E()+b.E());
+//double partB=   a.Pz()*a.Pz() + b.Pz()*b.Pz() ;// + sqrt( mass*mass + met*met);
+double smin_=-1;
+partA = pow((a.E()+b.E()),2);
+partB = pow(a.Pz()+b.Pz(),2);
+if (partA<partB) smin = -1;
+else smin_ = sqrt(partA  - partB); + sqrt( mass*mass + met*met);
+
+
+//cout<< " smin_ "<<smin_<<" "<<a.E()<<"  "<<b.E()<<"  "<<a.Pz()<<"  "<<b.Pz()<<"  "<<mass<<"  "<<met<<"   "<<partA<<"  "<<partB<<endl;
+
+
+return smin_;
+
+}
+
 double mcx(const double v1[4],const double v2[4]
 		       ,const double vds[4],const double ptm[2])
 {
@@ -513,6 +553,32 @@ void computeDzeta(float metX,  float metY,
 }
 
 
+double computeDzetaV(TLorentzVector leptV1,TLorentzVector leptV2, TLorentzVector metV){
+
+	double dzeta = -999;
+	float tauUnitX = leptV2.Px()/leptV2.Pt();
+	float tauUnitY = leptV2.Py()/leptV2.Pt();
+
+	float muonUnitX = leptV1.Px()/leptV1.Pt();
+	float muonUnitY = leptV1.Py()/leptV1.Pt();
+	float zetaX = tauUnitX + muonUnitX;
+	float zetaY = tauUnitY + muonUnitY;
+	float normZeta = TMath::Sqrt(zetaX*zetaX+zetaY*zetaY);
+	
+	zetaX = zetaX/normZeta;
+	zetaY = zetaY/normZeta;
+	
+	float vectorVisX = leptV1.Px() + leptV2.Px();
+	float vectorVisY = leptV1.Py() + leptV2.Py();
+				
+	float pzetamiss = metV.Px()*zetaX + metV.Py()*zetaY;
+	float pzetavis = vectorVisX*zetaX + vectorVisY*zetaY;
+	
+	dzeta = pzetamiss - 0.85*pzetavis;
+    
+	return dzeta;
+
+}
 
 
 

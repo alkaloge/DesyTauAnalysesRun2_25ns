@@ -197,21 +197,6 @@ int main(int argc, char * argv[]) {
 
   const double bTag   = cfg.get<double>("bTag");
 
-  CutList.clear();
-  CutList.push_back("No cut");
-  CutList.push_back("No cut after PU");
-  CutList.push_back("mu-tau");
-  CutList.push_back("2nd lepV");
-  CutList.push_back("3rd lepV");
-  CutList.push_back("Trigger");
-  CutList.push_back("Lepton SF");
-  CutList.push_back("TauFakeRate");
-  CutList.push_back("topPtRwgt");
-  CutList.push_back("Cleaned jets");
-  CutList.push_back("b-Veto");
-
-
-  int CutNumb = (int)CutList.size();
   xs=1;fact=1;fact2=1;
 
   unsigned int RunMin = 9999999;
@@ -1123,11 +1108,13 @@ if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.fi
       vector<bool> isMuonMatchedSingleMuFilter; isMuonMatchedSingleMuFilter.clear();
       vector<int> muons; muons.clear();
 	bool isMu1matched = false;
+	bool isMu1SUSYmatched = false;
       for (unsigned int im = 0; im<analysisTree.muon_count; ++im) {
 	allMuons.push_back(im);
 	if (isData && analysisTree.muon_isDuplicate[im]) continue;
 	if (isData && analysisTree.muon_isBad[im]) continue;
-	if (analysisTree.muon_pt[im]<SingleMuonTriggerPtCut) continue;
+	//if (analysisTree.muon_pt[im]<SingleMuonTriggerPtCut) continue;
+	if (analysisTree.muon_pt[im]<10) continue;
 	if (fabs(analysisTree.muon_eta[im])>etaMuonCut) continue;
 	if (fabs(analysisTree.muon_dxy[im])>dxyMuonCut) continue;
 	if (fabs(analysisTree.muon_dz[im])>dzMuonCut) continue;
@@ -1141,10 +1128,12 @@ if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.fi
 	neutralIso = TMath::Max(float(0),neutralIso); 
 	absIso += neutralIso;
 	float relIso = absIso/analysisTree.muon_pt[im];
-	if (relIso>0.15) continue;
+	if (relIso>0.3) continue;
 	  isoMuons.push_back(im);
 	  isoMuonsValue.push_back(relIso);
 	  muons.push_back((int)im);
+
+        if (SUSY && analysisTree.muon_pt[im]>SingleMuonTriggerPtCut) isMu1SUSYmatched = true;
 
 	if (!SUSY)
 	{
@@ -1166,8 +1155,8 @@ if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.fi
 
       }
 
-        if (SUSY) isMu1matched = true;
-	if (!isMu1matched) continue;
+        if (SUSY && !isMu1SUSYmatched) continue;
+	if (!SUSY && !isMu1matched) continue;
       	if (muons.size()==0) continue;
 
       // MC study
@@ -1234,7 +1223,7 @@ if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.fi
 	    float dRmumu = deltaR(analysisTree.muon_eta[index1],analysisTree.muon_phi[index1],
 				  analysisTree.muon_eta[index2],analysisTree.muon_phi[index2]);
 	    if (isTriggerMatch && dRmumu>dRleptonsCut) {
-	      bool sumIso = isoMuonsValue[im1]+isoMuonsValue[im2];
+	      double sumIso = isoMuonsValue[im1]+isoMuonsValue[im2];
 	      if (sumIso<isoMin) {
 		isIsoMuonsPair = true;
 		isoMin = sumIso;
@@ -1306,6 +1295,9 @@ if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.fi
 	foundExtraElectron = true;
       }
 
+	muon_index_1 = -1;
+	muon_index_2 = -1;
+	muon_index_3 = -1;
 
       // looking for extra muon
       bool foundExtraMuon = false;
@@ -1336,6 +1328,7 @@ if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.fi
 	float relIsoMu = absIsoMu/analysisTree.muon_pt[im];
 	if (relIsoMu>isoVetoMuonCut) continue;
 	foundExtraMuon = true;
+	foundThirdLepton++;
 	if (foundThirdLepton==1) muon_index_3 = (int)im;
       }
 

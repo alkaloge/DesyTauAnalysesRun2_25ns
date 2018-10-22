@@ -1,35 +1,19 @@
 #!/bin/sh
 #
-#(make sure the right shell will be used)
-#$ -S /bin/sh
-#
-#(the cpu time for this job)
-#$ -l h_cpu=1:29:00
-#
-#(the maximum memory usage of this job)
-#$ -l h_vmem=5000M
-#
-#(use hh site)
-#$ -l site=hh
-#(stderr and stdout are merged together to stdout)
-#$ -j y
-#
-# use SL5
-#$ -l os=sld6
-#
-# use current dir and current environment
-#$ -cwd
-#$ -V
-#
 
+#systematics="Nominal JetEnUp JetEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown"
+#systematics="Nominal JetEnUp JetEnDown TopPtUp TopPtDown ZPtUp ZPtDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown genMET ScalesDown ScalesUp PDFUp PDFDown BTagUp BTagDown METRecoilUp METRecoilDown TFRJetEnUp TFRJetEnDown TFRMuEnUp TFRMuEnDown TFRTauEnUp TFRTauEnDown"
+systematics="Nominal JetEnUp JetEnDown TopPtUp TopPtDown ZPtUp ZPtDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown genMET ScalesDown ScalesUp PDFUp PDFDown BTagUp BTagDown METRecoilUp METRecoilDown"
 
+#systematics="JetEnUp JetEnDown UnclEnUp UnclEnDown ZPtUp ZPtDown"
 
-cd /nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/CMSSW_8_0_20/src/DesyTauAnalyses/NTupleMaker/test;eval `scramv1 runtime -sh` ;
-flag=$2
+cd /afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test; eval `scramv1 runtime -sh` ;
 
-channel=$3
+rm jobss
 
-	if [[  -z "$3" ]] ;then
+channel=$2
+
+	if [[  -z "$2" ]] ;then
 
 		echo you must provide a channel....
 		return 1
@@ -38,48 +22,111 @@ channel=$3
 while read line
 do
 
+if [[  -z "$3" || $3 == "Nominal" ]] ;then
+systematics="Nominal"
+fi
 
-	
+if [[  $3 == "list" ]] ;then
+systematics="list"
+fi
+
+if [[  $3 == "listSignal" ]] ;then
+#systematics="Nominal JetEnUp JetEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown BTagUp BTagDown"
+systematics="listSignal"
+fi
+
+if [[  $3 == "listmuel" ]] ;then
+systematics="listmuel"
+fi
+
+if [[  $3 == "listTFR" ]] ;then
+systematics="TFRJetEnUp TFRJetEnDown TFRMuEnUp TFRMuEnDown TFRTauEnUp TFRTauEnDown"
+fi
+
+
+
+if [[  $3 == "listTT" ]] ;then
+systematics="Nominal JetEnUp JetEnDown TopPtUp TopPtDown ZPtUp ZPtDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown ScalesDown ScalesUp PDFUp PDFDown BTagUp BTagDown METRecoilUp METRecoilDown BTagUp BTagDown"
+fi
+
+if [[  $3 == "listDY" ]] ;then
+systematics="Nominal JetEnUp JetEnDown ZPtUp ZPtDown MuEnUp MuEnDown UnclEnUp UnclEnDown ScalesDown ScalesUp PDFUp PDFDown METRecoilUp METRecoilDown"
+fi
+
+
+
+if [[  $3 == "listWJ" ]] ;then
+systematics="Nominal JetEnUp JetEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown ScalesDown ScalesUp PDFUp PDFDown METRecoilUp METRecoilDown BTagUp BTagDown ZPtUp ZPtDown TopPtUp TopPtDown"
+#systematics="TopPtUp TopPtDown ZPtUp ZPtDown"
+#systematics="JetEnUp JetEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown BTagUp BTagDown"
+#systematics="BTagDown BTagUp"
+fi
+
+if [[  $3 == "top" ]] ;then
+systematics="TopPtUp TopPtDown"
+fi
+
+if [[  $3 == "Tau" ]] ;then
+systematics="TauEnUp TauEnDown"
+fi
+if [[  $3 == "Scales" ]] ;then
+systematics="ScalesUp ScalesDown"
+fi
+if [[  $3 == "PDF" ]] ;then
+systematics="PDFUp PDFDown"
+fi
+if [[  $3 == "El" ]] ;then
+systematics="ElEnUp ElEnDown"
+systematics="ElEnUp"
+fi
+if [[  $3 == "Mu" ]] ;then
+systematics="MuEnUp MuEnDown"
+fi
+
+if [[  $3 == "Jet" ]] ;then
+systematics="JetEnUp JetEnDown"
+fi
+
+if [[  $3 == "new" ]] ;then
+systematics="PDFUp PDFDown ScalesUp ScalesDown BTagUp BTagDown"
+systematics="PDFUp PDFDown ScalesUp ScalesDown"
+fi
+
+if [[  $3 == "MET" ]] ;then
+systematics="METRecoilUp METRecoilDown"
+fi
+
+
 lt=`echo $line | cut -d '/' -f2`
 
+whichcut=$4
 
 	echo $lt > list_$lt
 	
-	#echo submitting  run_mc.sh $lt
-
-	#if [[ ! -z "$2" ]] ;then
-	if [[ $2 == *"W"* ]] ;then
-		echo w template
-		qsub run_plots_Wtemplate.sh list_$lt $3
-		#qsub run_plots_WtemplateQCD.sh list_$lt
-	fi
+	for syst in $systematics
+	do
 	
-	if [[ $2 == *"MET"* ]] ;then
-	echo met inverted
-	 	qsub run_plotsB.sh list_$lt $3
-	fi
+		ltt=`echo $lt | awk -F "_B_OS.root" '{print $1}'`
+		if [[ ! -f plots_${2}/${ltt}_${syst}_B.root ]] ; then
+
+			
+
+		echo  plots for channel $2 and syst $syst and $ltt plots_${2} ${ltt}_${syst}_B.root
+	 	#bsub -R "rusage[mem=2048:pool=2000]"  -q 1nh  -J plots_${syst}_$2 -i /dev/null -o /dev/null -e /dev/null run_plots_new.sh list_$lt $2 $syst $whichcut
+		cp submit_template.sub subm_plots_${syst}_${2}.sub
+		cp submit_template.submit subm_plots_${syst}_${2}.sub
+		sed -i 's/EXECHERE/run_plots_new.sh/g' subm_plots_${syst}_${2}.sub
+		sed -i 's@arguments@arguments = list_'${lt}' '$2' '${syst}' '${shichcut}'@' subm_plots_${syst}_${2}.sub
+	#        condor_submit subm_plots_${syst}_${2}.sub
 	
-	if [[ $2 == *"Inv"* ]] ;then
-		echo inv region
-	 	qsub run_plots_InvTemplate.sh list_$lt $3
-
+	if [[ $lt != *"DY"* ]] && [[ $lt != *"TT_"* ]]; then
+	 	bsub -R "rusage[mem=2048:pool=2000]"  -q 1nh  -J plots_${syst}_$2 -i /dev/null -o /dev/null -e /dev/null run_plots_new.sh list_$lt $2 $syst $whichcut
+	else
+	#if [[ $lt == *"DY"* ]] || [[ $lt == *"TT_"* ]]; then
+	 	bsub -R "rusage[mem=2048:pool=2000]"  -q 8nh  -J plots_${syst}_$2 -i /dev/null -o /dev/null -e /dev/null run_plots_new.sh list_$lt $2 $syst $whichcut
 	fi
 
-	if [[ $2 == *"new"* ]] ;then
-		echo  plots for new workflow 
-	 	qsub -N p$3 run_plots_new.sh list_$lt $3
-	 	#qsub -N pA$3 run_plots_A.sh list_$lt $3
-	 	#qsub -N pB$3 run_plots_B.sh list_$lt $3
-	 	#qsub -N pC$3 run_plots_C.sh list_$lt $3
-	 	#qsub -N pD$3 run_plots_D.sh list_$lt $3
-
 	fi
-
-	if [[ $2 == *"Ttemplate"* ]] ;then
-		echo inv region
-	 	qsub run_plots_Ttemplate.sh list_$lt $3
-
-	fi
-
+	done
 done<$1
 

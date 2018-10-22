@@ -1,0 +1,65 @@
+
+void genMET(){
+
+
+string syst = "SYSTEMATICHERE";
+
+TFile *in1  = new TFile("POINT_SYSTEMATICHERE_B.root","update");
+TFile *in2  = new TFile("POINT_SYSTEMATICHERE_genMET_B.root","read");
+
+
+
+TH1D* h1 = (TH1D*)in1->Get("mutau/met_MT2lester_DZeta01J1D_17");
+TH1D* h2 = (TH1D*)in2->Get("mutau/met_MT2lester_DZeta01J1D_17");
+
+TH1D* hUp  = (TH1D*) h1->Clone("met_MT2lester_DZeta01J1D_17");
+TH1D* hDown  = (TH1D*) h1->Clone("met_MT2lester_DZeta01J1D_17");
+
+						
+
+float SoW = hw->GetSumOfWeights();
+int nBins = h1->GetNbinsX();
+
+for (int iB=1;iB<=nBins+1;++iB) {
+	
+	float ch1 = h1->GetBinContent(iB);
+	float ch2 = h2->GetBinContent(iB);
+
+	float acceptance = 1;
+	
+	if (syst !="PDF") acceptance = 0.5*(ch1+ch2);
+	if (syst =="PDF") acceptance = 0.5*(ch1+ch2);
+
+	
+//	cout<<" h1 "<<in1->GetName()<<"  "<<in3->GetName()<<" bin "<<iB<<" h1BinCont "<<h1->GetBinContent(iB)<<" h2BinCont "<<h2->GetBinContent(iB)<<"  "<<hw->GetSumOfWeights()<<" acc "<<acceptance<<" uncert "<<uncert<<endl;
+
+	h1->SetBinContent(iB,acceptance);
+	}
+
+in1->cd("mutau");
+h1->Write();
+in1->Close();
+delete in1;
+
+if (syst=="PDF"){
+TFile *outUp  = new TFile("POINT_PDFUp_B.root","update");
+outUp->cd();
+outUp->mkdir("mutau");
+outUp->cd("mutau");
+hww->Write();
+hUp->Write();
+outUp->Close();
+delete outUp;
+
+TFile *outDown  = new TFile("POINT_PDFDown_B.root","update");
+outDown->cd();
+outDown->mkdir("mutau");
+outDown->cd("mutau");
+hww->Write();
+hDown->Write();
+outDown->Close();
+delete outDown;
+}
+
+
+}

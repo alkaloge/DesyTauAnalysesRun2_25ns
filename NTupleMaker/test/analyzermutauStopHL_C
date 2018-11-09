@@ -161,9 +161,9 @@ cout <<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAa" <<endl;
 	string channel = "mutau";
 
 
-	TString fileinName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN";
+	TString fileinName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL/single-stop14TeV_2X_225_LSP92_B_OS.root";
 	if (systematic == "JetEnUp" || systematic == "JetEnDown"  || systematic == "UnclEnDown" || systematic == "UnclEnDown" || systematic == "TauEnUp" || systematic == "TauEnDown" || systematic == "ElEnUp" || systematic == "ElEnDown" || systematic == "MuEnUp" || systematic == "MuEnDown" || systematic == "BTagUp" || systematic == "BTagDown") 
-	{fileinName ="/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE_"+systematic+"/FILEIN";}
+	{fileinName ="/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL_"+systematic+"/single-stop14TeV_2X_225_LSP92_B_OS.root";}
 
 
 	TFile * filein = new TFile(fileinName,"read");

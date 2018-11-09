@@ -118,7 +118,7 @@ void analyzer::Loop()
 	sprintf(plots_,"plots/%s_B_OS_DataDriven.root",datasetName->c_str());
 	}*/
 	//string hist_ = "25ns/"+old+"_B_OS.root";
-	TFile * filein = new TFile("25ns/FILEIN","read");
+	TFile * filein = new TFile("25ns/TTZJets_TuneCUETP8M2_14TeV_madgraphMLM-pythia8_B_OS.root","read");
 
 
 	TH1D * histW = (TH1D*)filein->Get("mutau/histWeightsH");

@@ -4,7 +4,6 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TString.h>
-//#include "plots.h"
 #include <cmath>
 #include <sstream>
 #include <iomanip>
@@ -37,19 +36,23 @@
 
 
 
-using namespace std;
 
+using namespace std;
 
 
 
 void analyzer::Loop(){
 
+
 	if (fChain == 0) return;
+
+		
+
 	CutList.clear();
 	CutList.push_back("");
-	CutList.push_back("No cut");
-	CutList.push_back("mu-el");
-	CutList.push_back("3rd lepV");
+	CutList.push_back("Nocut");
+	CutList.push_back("#mu#mu");
+	CutList.push_back("3rdlepV");
 	CutList.push_back("njets<5");
 	CutList.push_back("btag<2");
 	CutList.push_back("Zmass"); 
@@ -61,20 +64,18 @@ void analyzer::Loop(){
 	CutList.push_back("Extra1");
 	CutList.push_back("Extra2");
 	CutList.push_back("Extra3");
-	CutList.push_back("Extra4");
 
-	string channel = "muel";
-	string Channel = "muel";
-	//ChiMass = 0;
-	ChiMass = 0.;
-	//cout<<" THE MASS IS ========================= "<<ChiMass<<endl;
+
+	string channel = "mumu";
+	string Channel = "mumu";
+
 	 int CutNumb = int(CutList.size());
          int iCFCounter[CutNumb];
 	 double CFCounter[CutNumb];
 	 for (int i=0;i < CutNumb; i++){
                         CFCounter[i] = 0;
-           	        CFCounter_[i] = 0;
-                        iCFCounter[i] = 0;
+			CFCounter_[i] = 0;
+         	        iCFCounter[i] = 0;
         }
 	fChain->GetEntry(0);  
 	string old = datasetName->c_str();
@@ -175,16 +176,11 @@ void analyzer::Loop(){
 	if (isSignal) cout<<" YOU HAVE FOUND ITTTTTTTTT is it signal ???  "<<isSignal<<" systematic "<<systematic<<endl;
 	if (isData) cout<<" YOU HAVE FOUND a DATA "<<endl;
 
- 	TString fileinName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN";
-        //if (systematic == "JetEnUp" || systematic == "JetEnDown"  || systematic == "UnclEnDown" || systematic == "UnclEnDown" || systematic == "TauEnUp" || systematic == "TauEnDown" || systematic == "ElEnUp" || systematic == "ElEnDown" || systematic == "MuEnUp" || systematic == "MuEnDown" || systematic == "BTagUp" || systematic == "BTagDown")
-        //{fileinName ="/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE_"+systematic+"/FILEIN";}
-	
-	cout<<" Will work with FILEIN and "<<systematic<<endl;
 
-        TFile * fCorr = new TFile("/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/HL-Optimistic.root","read");
+	TString fileinName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL/single-stop14TeV_2X_225_LSP92_B_OS.root";
+	if (systematic == "JetEnUp" || systematic == "JetEnDown"  || systematic == "UnclEnDown" || systematic == "UnclEnDown" || systematic == "TauEnUp" || systematic == "TauEnDown" || systematic == "ElEnUp" || systematic == "ElEnDown" || systematic == "MuEnUp" || systematic == "MuEnDown" || systematic == "BTagUp" || systematic == "BTagDown") 
+	{fileinName ="/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL_"+systematic+"/single-stop14TeV_2X_225_LSP92_B_OS.root";}
 
-        TH1F  * JES   = (TH1F*) fCorr->FindObjectAny("TOTAL_DIJET_AntiKt4EMTopo;1");
-	TH1F  * JER   = (TH1F*) fCorr->FindObjectAny("Flavor_Response_DIJET_AntiKt4EMTopo;1");
 
 	TFile * filein = new TFile(fileinName,"read");
 		
@@ -199,13 +195,11 @@ void analyzer::Loop(){
 
 
 	TH1D * histW ;
-
-	if (systematic == "ScalesUp" ) histW = (TH1D*)filein->Get("muel/histWeightsScalesUp");
-	else if (systematic == "ScalesDown" ) histW = (TH1D*)filein->Get("muel/histWeightsScalesDown");
-	else if (systematic == "PDFUp" ) histW = (TH1D*)filein->Get("muel/histWeightsPDFUp");
-	else if (systematic == "PDFDown" ) histW = (TH1D*)filein->Get("muel/histWeightsPDFDown");
-	else  {histW = (TH1D*)filein->Get("muel/histWeightsH");}
-
+	if (systematic == "ScalesUp" ) histW = (TH1D*)filein->Get("mumu/histWeightsScalesUp");
+	else if (systematic == "ScalesDown" ) histW = (TH1D*)filein->Get("mumu/histWeightsScalesDown");
+	else if (systematic == "PDFUp" ) histW = (TH1D*)filein->Get("mumu/histWeightsPDFUp");
+	else if (systematic == "PDFDown" ) histW = (TH1D*)filein->Get("mumu/histWeightsPDFDown");
+	else  {histW = (TH1D*)filein->Get("mumu/histWeightsH");}
 
 	if (string::npos != fln.find(N0part) && (isWJ || isWNJ)) isW0Part= true;
 	if (string::npos != fln.find(N1part) && (isWJ || isWNJ)) isW1Part= true;
@@ -224,8 +218,11 @@ void analyzer::Loop(){
 
 	float Nw = 1;
 
+	cout<<" The Systematic "<<systematic<<" histW "<<histW->GetSumOfWeights()<<endl;
 	
 
+	//cout<<"  "<<old<<"  "<<datasetName->c_str()<<"  "<<hist_<<"  "<<CutFlow->GetName()<<"  "<<CutFlow->GetBinContent(1)<<endl;
+		
 	file->mkdir(Channel.c_str());
 	file->cd(Channel.c_str());
 	Long64_t nentries = fChain->GetEntriesFast();
@@ -250,17 +247,21 @@ void analyzer::Loop(){
 	int is4partons=0;
 
 
-
-
 	for (Long64_t jentry=0; jentry<nentries;jentry++) {
 		Long64_t ientry = LoadTree(jentry);
+		
 
-		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
-		float all_weights = 1.;
+		all_weights = 1.;
+	Int_t l1_index = muon_index_1;
+	Int_t l2_index = muon_index_2;
+	Int_t l3_index = muon_index_3;
+
+		////////////////// IMPORTANT///////////////////
+
 
 		if (mu_relIso[0] > 0.2) continue;
-		if (el_relIso[1] > 0.2) continue;
+		if (mu_relIso[1] > 0.2) continue;
 
 		bool isDYTauTau = false;
 		bool isDYll = false;
@@ -276,13 +277,11 @@ void analyzer::Loop(){
 		if ((isDY || isDYNJ) && !isZTT && !isDYll) continue;
 
 
-	if (muon_index <0 || electron_index <0) continue;
+	if (muon_index_1 <0 || muon_index_2 <0) continue;
+	if (muon_index_3 >-1 ) continue;
 
-	Int_t l1_index = muon_index;
-	Int_t l2_index = electron_index;
-	Int_t l3_index = muon_index;
 
-		float charge_ =mu_charge[muon_index]  * el_charge[electron_index];
+		float charge_ =mu_charge[muon_index_1]  * mu_charge[muon_index_2];
 
 		if ( charge_ > 0. ) continue;
 
@@ -300,6 +299,8 @@ void analyzer::Loop(){
 		btag_index.clear();
 
 			JetsV.SetPxPyPzE(0.,0.,0.,0.);
+			MuV.SetPxPyPzE(0.,0.,0.,0.);
+			ElV.SetPxPyPzE(0.,0.,0.,0.);
 			TauV.SetPxPyPzE(0.,0.,0.,0.);
 	for (int nj=0;nj<njets;++nj) {
 	int jet_index = jets_cleaned[nj];
@@ -309,146 +310,108 @@ void analyzer::Loop(){
 	}
 
 	float met = -1;
-		
+
+
+
 		METV.SetPx(met_ex);
 		METV.SetPy(met_ey);
 		met= sqrt(met_ex*met_ex + met_ey*met_ey);  
 
 
+//JetEnUp JetEnDown UnclEnUp UnclEnDown
+	if (systematic =="JetEnUp")
+		{
+		METV.SetPx(met_ex_JetEnUp);
+		METV.SetPy(met_ey_JetEnUp);
+		met = sqrt(met_ex_JetEnUp*met_ex_JetEnUp + met_ey_JetEnUp*met_ey_JetEnUp);      
+		}
+
+	if (systematic =="JetEnDown")
+		{
+		METV.SetPx(met_ex_JetEnDown);
+		METV.SetPy(met_ey_JetEnDown);
+		met = sqrt(met_ex_JetEnDown*met_ex_JetEnDown + met_ey_JetEnDown*met_ey_JetEnDown);     
+		}
+
+	if (systematic =="UnclEnUp")
+		{
+		METV.SetPx(met_ex_UnclusteredEnUp);
+		METV.SetPy(met_ey_UnclusteredEnUp);
+		met = sqrt(met_ex_UnclusteredEnUp*met_ex_UnclusteredEnUp + met_ey_UnclusteredEnUp*met_ey_UnclusteredEnUp);     
+		}
+
+	if (systematic =="UnclEnDown")
+		{
+		METV.SetPx(met_ex_UnclusteredEnDown);
+		METV.SetPy(met_ey_UnclusteredEnDown);
+		met = sqrt(met_ex_UnclusteredEnDown*met_ex_UnclusteredEnDown + met_ey_UnclusteredEnDown*met_ey_UnclusteredEnDown);
+		}
 
 
-		if(muon_index<0 || electron_index<0) continue;
+if(muon_index_1>-1 )			LeptV1.SetPtEtaPhiM(mu_pt[muon_index_1], mu_eta[muon_index_1], mu_phi[muon_index_1], muonMass);
+if(muon_index_2>-1 )			LeptV2.SetPtEtaPhiM(mu_pt[muon_index_2], mu_eta[muon_index_2], mu_phi[muon_index_2], muonMass);
+if(muon_index_3>-1 )			LeptV3.SetPtEtaPhiM(mu_pt[muon_index_3], mu_eta[muon_index_3], mu_phi[muon_index_3], muonMass);
 
-if(muon_index>-1 )			LeptV1.SetPtEtaPhiM(mu_pt[muon_index], mu_eta[muon_index], mu_phi[muon_index], muonMass);
-
-if(electron_index>-1 )			LeptV2.SetPtEtaPhiM(el_pt[electron_index], el_eta[electron_index], el_phi[electron_index],electronMass);
-					LeptV3.SetPtEtaPhiM(0,0,0,0);
-
-
-
-if (systematic == "JetEnUp" )
-{
-
-                JetsMV.clear();
-
-        for (int nj=0;nj<njets;++nj) {
-        int jet_index = jets_cleaned[nj];
-        JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JES->GetBinContent(JES->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
-        JetsMV.push_back(JetsV);
-        }
-
-                METV.SetPx(met_ex*(1+0.005));
-                METV.SetPy(met_ey*(1+0.005));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
-
-}
-
-
-if (systematic == "JetEnDown" )
-{
-
-                JetsMV.clear();
-
-        for (int nj=0;nj<njets;++nj) {
-        int jet_index = jets_cleaned[nj];
-        JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JES->GetBinContent(JES->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
-        JetsMV.push_back(JetsV);
-        }
-
-                METV.SetPx(met_ex*(1+0.005));
-                METV.SetPy(met_ey*(1+0.005));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
-
-}
-
-
-if (systematic == "JetResDown" && taus_index>-1 )
-{
-
-                JetsMV.clear();
-
-        for (int nj=0;nj<njets;++nj) {
-        int jet_index = jets_cleaned[nj];
-        JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JER->GetBinContent(JER->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
-        JetsMV.push_back(JetsV);
-        }
-
-                METV.SetPx(met_ex*(1-0.003));
-                METV.SetPy(met_ey*(1-0.003));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
-
-}
-
-
-if (systematic == "JetResUp" && taus_index>-1 )
-{
-
-                JetsMV.clear();
-
-        for (int nj=0;nj<njets;++nj) {
-        int jet_index = jets_cleaned[nj];
-        JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JER->GetBinContent(JER->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
-        JetsMV.push_back(JetsV);
-        }
-
-                METV.SetPx(met_ex*(1+0.003));
-                METV.SetPy(met_ey*(1+0.003));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
-
-}
-
-
-
-	bool doObjectMET=false;
-
-	if (doObjectMET){
         TLorentzVector vMETsum = (-1)*LeptV1 + (-1)*LeptV2;
+
         for (unsigned int i = 0; i <   JetsMV.size(); i++) vMETsum = vMETsum-JetsMV.at(i);
 
 	METV = vMETsum;
 	met=sqrt(vMETsum.Px()*vMETsum.Px() + vMETsum.Py()*vMETsum.Py());
-		}
-
-
-
-
-
-
-
 
 		int iCut = 1;
 
 		all_weights = gen_weight ;
+		double cLower, cUpper;
+		vector <double> ScalesV; ScalesV.clear();
+//		ScalesV.push_back(wScale0);
+		ScalesV.push_back(wScale1);
+		ScalesV.push_back(wScale2);
+		ScalesV.push_back(wScale3);
+		ScalesV.push_back(wScale4);
+		ScalesV.push_back(wScale5);
+		ScalesV.push_back(wScale6);
+		ScalesV.push_back(wScale7);
+		ScalesV.push_back(wScale8);
 
-		int CutN=0;
+		cLower = *min_element(ScalesV.begin(), ScalesV.end());
+      	        cUpper = *max_element(ScalesV.begin(), ScalesV.end());
+	if (!isData){
 
+	if (systematic =="ScalesDown") all_weights *=cLower;
+	if (systematic =="ScalesUp") all_weights *=cUpper;
+	if (systematic =="PDFUp") all_weights *=wPDFUp;
+	if (systematic =="PDFDown") all_weights *=wPDFDown;
 
+//cout<<" lets see the facts  "<<gen_weight<<"  "<<wScale0<<"  "<<wScale1<<"  "<<wScale2<<"  "<<wScale3<<"  "<<wScale4<<"  "<<wScale5<<"  "<<wScale6<<"  "<<wScale7<<"  "<<wScale8<<" min "<<cLower<<" max  "<<cUpper<<" pdfUp "<<wPDFUp<<" pdfDown "<<wPDFDown<<endl;
+
+	}
 ////////////////////////////////////////////////////////////////////////////
 
+//	cout<<" Properties  "<<LeptV1.Px()<<"   "<<LeptV1.Pt()<<"   "<<LeptV2.Px()<<"  "<<LeptV2.Pt()<<"  "<<mu_relIso[0]<<"  "<<mu_relIso[1]<<"  "<<muon_index_1<<"  "<<muon_index_2<<endl;
+
+		int CutN = 0;
+		
+		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
+		
+		if (mu_relIso[0] > 0.1) continue;
+		if (mu_relIso[1] > 0.1) continue;
+		
+		
+		if ( fabs(mu_charge[muon_index_1]) !=1 ) continue;
+		if ( fabs(mu_charge[muon_index_2]) !=1 ) continue;
+
+
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
 
-
-		if ( el_relIso[0] > 0.2)  continue;
-		if ( mu_relIso[0] > 0.2)  continue;
-
-
-		if ( fabs(el_charge[electron_index]) !=1 ) continue;
-		if ( fabs(mu_charge[muon_index]) !=1 ) continue;
-
-
-		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
 
 		if (event_thirdLeptonVeto >0.5) continue;
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
@@ -456,7 +419,7 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
-	
+		
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -476,8 +439,8 @@ if (systematic == "JetResUp" && taus_index>-1 )
 
 		double MeffHTMETOsqrMET= ( (sumpT + LeptV1.Pt() + LeptV2.Pt() + METV.Pt())/sqrt(METV.Pt()));
 		double MeffLepton= sumpT + LeptV1.Pt() + LeptV2.Pt() + METV.Pt();
-		double MeffLept1= sumpT + LeptV1.Pt() + METV.Pt();
-		double MeffLept2= sumpT + LeptV2.Pt() + METV.Pt();
+		double MeffLept1= sumpT + LeptV1.Pt()  + METV.Pt();
+		double MeffLept2= sumpT + LeptV2.Pt()  + METV.Pt();
 
 		dEta = LeptV1.Eta() - LeptV2.Eta();
 
@@ -502,7 +465,11 @@ if (systematic == "JetResUp" && taus_index>-1 )
 	///////////////////////
 
 
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		if (DoNoCut !=iCut && njets>4) continue;
+		if (DoNoCut !=iCut && njets==0) continue;
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
@@ -519,7 +486,7 @@ if (systematic == "JetResUp" && taus_index>-1 )
 
 		//if (DoNoCut !=iCut && MTl1<120) continue;
 		//if (DoNoCut !=iCut && MTl2<120) continue;
-		if (  DiL.M() >50  && DiL.M()<80) continue;
+		if (  DiL.M() < 105 && DiL.M()>75) continue;
 
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
@@ -528,16 +495,14 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		iCut++;
 
 
-
-		if (DoNoCut !=iCut && met<80.) continue;
+		if (DoNoCut !=iCut && met<50.) continue;
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
 
-	
-
+		
 		double dPhiL=dPhiFrom2P(LeptV1.Px() ,  LeptV1.Py() ,LeptV2.Px() ,  LeptV2.Py() );
 
 		if (DoNoCut !=iCut && Dr>3) continue;
@@ -550,7 +515,7 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		
 	
 		if (JetsMV.size()>0 && JetsMV.at(0).Pt()>400) continue;
-		if (JetsMV.size()>1 && JetsMV.at(1).Pt()>150) continue;
+		if (JetsMV.size()>1 && JetsMV.at(1).Pt()>200) continue;
 		if (JetsMV.size()>2 && JetsMV.at(2).Pt()>100) continue;
 		if (JetsMV.size()>3 && JetsMV.at(3).Pt()>80) continue;
 
@@ -575,9 +540,6 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		if (DoNoCut !=iCut &&  fabs(LeptV2.Eta())> 2) continue;
 		if (DoNoCut !=iCut &&  fabs(LeptV2.Pt())> 150) continue;
 
-		if (DoNoCut !=iCut &&  fabs(LeptV1.Pt())< 30) continue; //added for ConfC
-		if (DoNoCut !=iCut &&  fabs(LeptV2.Pt())< 30) continue; // aded for ConfCm
-
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
@@ -596,10 +558,9 @@ if (systematic == "JetResUp" && taus_index>-1 )
                 iCFCounter[iCut]++;
 		iCut++;
 
-		if (DiL.M()<80) continue;
+		if (DiL.M()<105) continue;
 		if (DoNoCut !=iCut && MeffLept1<250) continue;
 		if (DoNoCut !=iCut && MeffLept2<250) continue;
-		if (DoNoCut !=iCut && Dr<1) continue;
 
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
@@ -608,27 +569,15 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		iCut++;
 	
 		//MCTb < 200
-  	        //double mcta = sqrt( 2* LeptV1.Pt()* LeptV2.Pt()*(1+cos( LeptV1.Phi()- LeptV2.Phi())) );
-		//if (mcta>200) continue;
-		//if (mcta<20) continue;
-		if (DoNoCut !=iCut && MTl1<40) continue;
-		if (DoNoCut !=iCut && MTl2<40) continue;
+  	        double mcta = sqrt( 2* LeptV1.Pt()* LeptV2.Pt()*(1+cos( LeptV1.Phi()- LeptV2.Phi())) );
+		if (mcta>200) continue;
+		if (mcta<20) continue;
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
 
-	//	if (DoNoCut !=iCut && met<80) continue;
-		if (DoNoCut !=iCut && met>350) continue;
-		if (DoNoCut !=iCut && HTOMET>4) continue;
-		if (DiL.Pt() < 30 && DiL.Pt()>200) continue;
-
-		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
 
 }
 
@@ -659,4 +608,6 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		cout<<" Failed events  "<<counter<<endl;
 	}
 /////////////////////////////////////////////
+
+		
 

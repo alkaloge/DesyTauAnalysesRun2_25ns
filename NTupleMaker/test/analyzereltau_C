@@ -74,7 +74,7 @@ void analyzer::Loop(){
 	CutList.push_back("MET gt 30");
 	CutList.push_back("MET gt 40");
 
-	//ChiMass = CHIMASSS;
+	//ChiMass = 0;
 	ChiMass = 0.;
 	//cout<<" THE MASS IS ========================= "<<ChiMass<<endl;
 
@@ -108,7 +108,7 @@ void analyzer::Loop(){
 	bool InvertLeptonIso = LEPTONHERE;
 	//bool HighInvertLeptonIso = HIGHISO;
 	string Sign = "SIGNHERE";
-	string systematic="SYSTEMATICHERE";
+	string systematic="Nominal";
 
 	
 	string cut = to_string(t);
@@ -148,7 +148,7 @@ void analyzer::Loop(){
 	if (isSignal) cout<<" YOU HAVE FOUND ITTTTTTTTT "<<endl;
 	if (isData) cout<<" YOU HAVE FOUND a DATA "<<endl;
 
-	string channel = "CHANNELHERE";
+	string channel = "muelStopHL";
 
 
 /*
@@ -166,7 +166,7 @@ TH2D *histo = (TH2D*) obj;
 */
 
 
-	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/CMSSW_8_0_20/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN","read");
+	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/CMSSW_8_0_20/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL/TTZJets_TuneCUETP8M2_14TeV_madgraphMLM-pythia8_B_OS.root","read");
 
 	TH1D * histW = (TH1D*)filein->Get("eltau/histWeightsH");
 	TH1D * histTop ;

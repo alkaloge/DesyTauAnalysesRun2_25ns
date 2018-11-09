@@ -69,7 +69,7 @@ void analyzer::Loop(){
 
 
 
-	//ChiMass = CHIMASSS;
+	//ChiMass = 0;
 	ChiMass = 0.;
 	//cout<<" THE MASS IS ========================= "<<ChiMass<<endl;
 	 int CutNumb = int(CutList.size());
@@ -103,7 +103,7 @@ void analyzer::Loop(){
 	bool InvertLeptonIso = LEPTONHERE;
 //	bool HighInvertLeptonIso = HIGHISO;
 	string Sign = "SIGNHERE";
-	string systematic="SYSTEMATICHERE";
+	string systematic="Nominal";
 
 	
 
@@ -142,7 +142,7 @@ void analyzer::Loop(){
 	if (isSignal) cout<<" YOU HAVE FOUND ITTTTTTTTT "<<endl;
 	if (isData) cout<<" YOU HAVE FOUND a DATA "<<endl;
 
-	string channel = "CHANNELHERE";
+	string channel = "muelStopHL";
 
 	TString inputRootFile = "/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/CMSSW_8_0_12/src/DesyTauAnalyses/NTupleMaker/data/HIP_mediumID.root";
 	TFile * fileInHIP = new TFile(inputRootFile, "read");
@@ -165,7 +165,7 @@ TH2D *histo = (TH2D*) obj;
 
 
 
-	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/CMSSW_8_0_12/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN","read");
+	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/CMSSW_8_0_12/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL/TTZJets_TuneCUETP8M2_14TeV_madgraphMLM-pythia8_B_OS.root","read");
 
 
 	TH1D * histW = (TH1D*)filein->Get("muel/histWeightsH");

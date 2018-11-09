@@ -86,7 +86,7 @@ void analyzer::Loop(){
 	CutList.push_back("HTOsrtMET lt 10");
 	CutList.push_back("MCTb lt 20");
 	CutList.push_back("MET gt 50");
-	//ChiMass = CHIMASSS;
+	//ChiMass = 0;
 	ChiMass = 0.;
 	//cout<<" THE MASS IS ========================= "<<ChiMass<<endl;
 
@@ -130,7 +130,7 @@ void analyzer::Loop(){
 
 
 
-	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/CMSSW_7_4_14/src/DesyTauAnalyses/NTupleMaker/test/25ns/FILEIN","read");
+	TFile * filein = new TFile("/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/CMSSW_7_4_14/src/DesyTauAnalyses/NTupleMaker/test/25ns/TTZJets_TuneCUETP8M2_14TeV_madgraphMLM-pythia8_B_OS.root","read");
 
 	TH1D * histW = (TH1D*)filein->Get("mutau/histWeightsH");
 	TH1D * hxsecW = (TH1D*)filein->Get("mutau/xsec");

@@ -1375,6 +1375,8 @@ if (pzetavis !=0) dzetaR = pzetamiss/pzetavis;
 	bool dogenMET=false;
 
 	met=MetV.Pt();
+	metx=MetV.Px();
+	mety=MetV.Py();
 	metphi=MetV.Phi();
 
 	if (dogenMET){
@@ -1387,10 +1389,10 @@ if (pzetavis !=0) dzetaR = pzetamiss/pzetavis;
 
 	MetV = vMETsum;
 	met=sqrt(vMETsum.Px()*vMETsum.Px() + vMETsum.Py()*vMETsum.Py());
-	metx = vMETsum.Px();
-	mety = vMETsum.Py();
-	metphi = vMETsum.Phi();
-	MetV = vMETsum;
+	//metx = vMETsum.Px();
+	//mety = vMETsum.Py();
+	//metphi = vMETsum.Phi();
+	//MetV = vMETsum;
 	}
 
     AllJets_Lepton_noMet.clear();
@@ -2135,7 +2137,8 @@ analyzer::analyzer(TTree *tree) : fChain(0)
 
     // The following code should be used if you want this class to access a chain
     // of trees.
-    TChain * chain = new TChain("DIRHERE/T","");
+
+ TChain * chain = new TChain("DIRHERE/T","");
 
    TString ChainName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN/DIRHERE/T";
 

@@ -478,7 +478,7 @@ bool WithInit = false;
       el_relIso[0]=isoEleMin;
       mu_relIso[0]=isoMuMin;
 
-      if (isoEleMin>0.3 || isoMuMin>0.3) continue;
+      if (isoEleMin>0.2 || isoMuMin>0.2) continue;
       
       double q = analysisTree.electron_charge[el_index] * analysisTree.muon_charge[mu_index];
       event_sign  = q;
@@ -580,7 +580,7 @@ bool WithInit = false;
 	jet_eta[jj] = analysisTree.pfjet_eta[jj];
 	jet_phi[jj] = analysisTree.pfjet_phi[jj];
 	jet_flavour[jj] = analysisTree.pfjet_flavour[jj];
-	jet_btag[jj] = analysisTree.pfjet_btag[jj][0];
+	jet_btag[jj] = analysisTree.pfjet_btag[jj][1];
       }
 
 

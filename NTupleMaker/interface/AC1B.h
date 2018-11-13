@@ -45,6 +45,7 @@ public :
    Int_t           primvertex_ntracks;
    Float_t         primvertex_cov[6];
    UInt_t          muon_count;
+   Float_t	   muon_genmatch[50];
    Float_t         muon_px[50];   //[muon_count]
    Float_t         muon_py[50];   //[muon_count]
    Float_t         muon_pz[50];   //[muon_count]
@@ -56,7 +57,7 @@ public :
    Float_t         muon_normChi2[50];   //[muon_count]
    Float_t         muon_ndof[50];   //[muon_count]
    Float_t         muon_charge[50];   //[muon_count]
-   Float_t         muon_miniISO[50];   //[muon_count]
+   Float_t         muon_puIso[50];   //[muon_count]
    Float_t         muon_combQ_chi2LocalPosition[50];   //[muon_count]
    Float_t         muon_combQ_trkKink[50];   //[muon_count]
    Float_t         muon_validFraction[50];   //[muon_count]
@@ -72,7 +73,7 @@ public :
    Float_t         muon_chargedHadIso[50];   //[muon_count]
    Float_t         muon_neutralHadIso[50];   //[muon_count]
    Float_t         muon_photonIso[50];   //[muon_count]
-   Float_t         muon_puIso[50];   //[muon_count]
+   Float_t         muon_relIso[50];   //[muon_count]
    Float_t         muon_r03_sumChargedHadronPt[50];   //[muon_count]
    Float_t         muon_r03_sumChargedParticlePt[50];   //[muon_count]
    Float_t         muon_r03_sumNeutralHadronEt[50];   //[muon_count]
@@ -135,6 +136,7 @@ public :
    Float_t         pfjet_pu_jet_full_mva[100]; //[pfjet_count]
    Float_t         pfjet_pu_jet_fullDisc_mva[100]; //[pfjet_count]
    UInt_t          electron_count;
+   Float_t         electron_genmatch[50];   //[electron_count]
    Float_t         electron_px[50];   //[electron_count]
    Float_t         electron_py[50];   //[electron_count]
    Float_t         electron_pz[50];   //[electron_count]
@@ -163,7 +165,7 @@ public :
    Float_t         electron_ehcaloverecaldepth2[50];   //[electron_count]
    Float_t         electron_full5x5_sigmaietaieta[50];   //[electron_count]
    Float_t         electron_ooemoop[50];   //[electron_count]
-   Float_t         electron_miniISO[50];   //[electron_count]
+   Float_t         electron_puIso[50];   //[electron_count]
    Float_t         electron_superclusterEta[50];   //[electron_count]
    Float_t         electron_superclusterPhi[50];   //[electron_count]
    Float_t         electron_superclusterX[50];   //[electron_count]
@@ -172,7 +174,7 @@ public :
    Float_t         electron_chargedHadIso[50];   //[electron_count]
    Float_t         electron_neutralHadIso[50];   //[electron_count]
    Float_t         electron_photonIso[50];   //[electron_count]
-   Float_t         electron_puIso[50];   //[electron_count]
+   Float_t         electron_relIso[50];   //[electron_count]
    Float_t         electron_r03_sumChargedHadronPt[50];   //[electron_count]
    Float_t         electron_r03_sumChargedParticlePt[50];   //[electron_count]
    Float_t         electron_r03_sumNeutralHadronEt[50];   //[electron_count]
@@ -583,7 +585,8 @@ public :
    Float_t         tau_againstMuonLoose3[50];   //[tau_count]
    Float_t         tau_againstMuonTight3[50];   //[tau_count]
    Float_t         tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[50];   //[tau_count]
-   Float_t         tau_byIsolationMVArun2v1DBdR03oldDMwLTraw[50];   //[tau_count]
+   Float_t         tau_byIsolationMVArun2v1Tight[50];   //[tau_count]
+   Float_t         tau_byIsolationMVArun2v1Medium[50];   //[tau_count]
    Float_t         tau_byIsolationMVArun2v1DBnewDMwLTraw[50];   //[tau_count]
    Float_t         tau_byIsolationMVArun2v1DBoldDMwLTraw[50];   //[tau_count]
    Float_t         tau_byIsolationMVArun2v1PWdR03oldDMwLTraw[50];   //[tau_count]
@@ -677,6 +680,7 @@ public :
    TBranch        *b_primvertex_ntracks;   //!
    TBranch        *b_primvertex_cov;   //!
    TBranch        *b_muon_count;   //!
+   TBranch        *b_muon_genmatch;   //!
    TBranch        *b_muon_px;   //!
    TBranch        *b_muon_py;   //!
    TBranch        *b_muon_pz;   //!
@@ -688,7 +692,7 @@ public :
    TBranch        *b_muon_normChi2;   //!
    TBranch        *b_muon_ndof;   //!
    TBranch        *b_muon_charge;   //!
-   TBranch        *b_muon_miniISO;   //!
+   TBranch        *b_muon_puIso;   //!
    TBranch        *b_muon_combQ_chi2LocalPosition;   //!
    TBranch        *b_muon_combQ_trkKink;   //!
    TBranch        *b_muon_validFraction;   //!
@@ -704,7 +708,7 @@ public :
    TBranch        *b_muon_chargedHadIso;   //!
    TBranch        *b_muon_neutralHadIso;   //!
    TBranch        *b_muon_photonIso;   //!
-   TBranch        *b_muon_puIso;   //!
+   TBranch        *b_muon_relIso;   //!
    TBranch        *b_muon_r03_sumChargedHadronPt;   //!
    TBranch        *b_muon_r03_sumChargedParticlePt;   //!
    TBranch        *b_muon_r03_sumNeutralHadronEt;   //!
@@ -766,6 +770,7 @@ public :
    TBranch        *b_pfjet_pu_jet_fullId_tight;   //!
    TBranch        *b_pfjet_pu_jet_fullDisc_mva;   //!
    TBranch        *b_electron_count;   //!
+   TBranch        *b_electron_genmatch;   //!
    TBranch        *b_electron_px;   //!
    TBranch        *b_electron_py;   //!
    TBranch        *b_electron_pz;   //!
@@ -794,7 +799,7 @@ public :
    TBranch        *b_electron_ehcaloverecaldepth2;   //!
    TBranch        *b_electron_full5x5_sigmaietaieta;   //!
    TBranch        *b_electron_ooemoop;   //!
-   TBranch        *b_electron_miniISO;   //!
+   TBranch        *b_electron_puIso;   //!
    TBranch        *b_electron_superclusterEta;   //!
    TBranch        *b_electron_superclusterPhi;   //!
    TBranch        *b_electron_superclusterX;   //!
@@ -803,7 +808,7 @@ public :
    TBranch        *b_electron_chargedHadIso;   //!
    TBranch        *b_electron_neutralHadIso;   //!
    TBranch        *b_electron_photonIso;   //!
-   TBranch        *b_electron_puIso;   //!
+   TBranch        *b_electron_relIso;   //!
    TBranch        *b_electron_r03_sumChargedHadronPt;   //!
    TBranch        *b_electron_r03_sumChargedParticlePt;   //!
    TBranch        *b_electron_r03_sumNeutralHadronEt;   //!
@@ -1198,7 +1203,8 @@ public :
    TBranch        *b_tau_againstMuonLoose3;   //!
    TBranch        *b_tau_againstMuonTight3;   //!
    TBranch        *b_tau_byCombinedIsolationDeltaBetaCorrRaw3Hits;   //!
-   TBranch        *b_tau_byIsolationMVArun2v1DBdR03oldDMwLTraw;   //!
+   TBranch        *b_tau_byIsolationMVArun2v1Tight;   //!
+   TBranch        *b_tau_byIsolationMVArun2v1Medium;   //!
    TBranch        *b_tau_byIsolationMVArun2v1DBnewDMwLTraw;   //!
    TBranch        *b_tau_byIsolationMVArun2v1DBoldDMwLTraw;   //!
    TBranch        *b_tau_byIsolationMVArun2v1PWdR03oldDMwLTraw;   //!
@@ -1313,7 +1319,7 @@ Int_t AC1B::GetEntry(Long64_t entry)
 // Read contents of entry.
    if (!fChain) return 0;
    Int_t entryX = fChain->GetEntry(entry);
-   
+   /*
    if (entry>0) {
        hltriggerresults_first.clear();
        hltriggerresults_second.clear();
@@ -1337,7 +1343,7 @@ Int_t AC1B::GetEntry(Long64_t entry)
 	 flags_second.push_back(it->second);
        }
 
-   }
+   }*/
    return entryX;
 }
 Long64_t AC1B::LoadTree(Long64_t entry)
@@ -1407,6 +1413,7 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("primvertex_ntracks", &primvertex_ntracks, &b_primvertex_ntracks);
    fChain->SetBranchAddress("primvertex_cov", primvertex_cov, &b_primvertex_cov);
    fChain->SetBranchAddress("muon_count", &muon_count, &b_muon_count);
+   fChain->SetBranchAddress("muon_genmatch", muon_genmatch, &b_muon_genmatch);
    fChain->SetBranchAddress("muon_px", muon_px, &b_muon_px);
    fChain->SetBranchAddress("muon_py", muon_py, &b_muon_py);
    fChain->SetBranchAddress("muon_pz", muon_pz, &b_muon_pz);
@@ -1418,7 +1425,7 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("muon_normChi2", muon_normChi2, &b_muon_normChi2);
    fChain->SetBranchAddress("muon_ndof", muon_ndof, &b_muon_ndof);
    fChain->SetBranchAddress("muon_charge", muon_charge, &b_muon_charge);
-   fChain->SetBranchAddress("muon_miniISO", muon_miniISO, &b_muon_miniISO);
+   fChain->SetBranchAddress("muon_puIso", muon_puIso, &b_muon_puIso);
    fChain->SetBranchAddress("muon_combQ_chi2LocalPosition", muon_combQ_chi2LocalPosition, &b_muon_combQ_chi2LocalPosition);
    fChain->SetBranchAddress("muon_combQ_trkKink", muon_combQ_trkKink, &b_muon_combQ_trkKink);
    fChain->SetBranchAddress("muon_validFraction", muon_validFraction, &b_muon_validFraction);
@@ -1434,7 +1441,7 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("muon_chargedHadIso", muon_chargedHadIso, &b_muon_chargedHadIso);
    fChain->SetBranchAddress("muon_neutralHadIso", muon_neutralHadIso, &b_muon_neutralHadIso);
    fChain->SetBranchAddress("muon_photonIso", muon_photonIso, &b_muon_photonIso);
-   fChain->SetBranchAddress("muon_puIso", muon_puIso, &b_muon_puIso);
+   fChain->SetBranchAddress("muon_relIso", muon_relIso, &b_muon_relIso);
    fChain->SetBranchAddress("muon_r03_sumChargedHadronPt", muon_r03_sumChargedHadronPt, &b_muon_r03_sumChargedHadronPt);
    fChain->SetBranchAddress("muon_r03_sumChargedParticlePt", muon_r03_sumChargedParticlePt, &b_muon_r03_sumChargedParticlePt);
    fChain->SetBranchAddress("muon_r03_sumNeutralHadronEt", muon_r03_sumNeutralHadronEt, &b_muon_r03_sumNeutralHadronEt);
@@ -1497,6 +1504,7 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("pfjet_pu_jet_fullDisc_mva", pfjet_pu_jet_full_mva, &b_pfjet_pu_jet_fullDisc_mva);
    fChain->SetBranchAddress("pfjet_pu_jet_fullDisc_mva", pfjet_pu_jet_fullDisc_mva, &b_pfjet_pu_jet_fullDisc_mva);
    fChain->SetBranchAddress("electron_count", &electron_count, &b_electron_count);
+   fChain->SetBranchAddress("electron_genmatch", electron_genmatch, &b_electron_genmatch);
    fChain->SetBranchAddress("electron_px", electron_px, &b_electron_px);
    fChain->SetBranchAddress("electron_py", electron_py, &b_electron_py);
    fChain->SetBranchAddress("electron_pz", electron_pz, &b_electron_pz);
@@ -1525,7 +1533,7 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("electron_ehcaloverecaldepth2", electron_ehcaloverecaldepth2, &b_electron_ehcaloverecaldepth2);
    fChain->SetBranchAddress("electron_full5x5_sigmaietaieta", electron_full5x5_sigmaietaieta, &b_electron_full5x5_sigmaietaieta);
    fChain->SetBranchAddress("electron_ooemoop", electron_ooemoop, &b_electron_ooemoop);
-   fChain->SetBranchAddress("electron_miniISO", electron_miniISO, &b_electron_miniISO);
+   fChain->SetBranchAddress("electron_puIso", electron_puIso, &b_electron_puIso);
    fChain->SetBranchAddress("electron_superclusterEta", electron_superclusterEta, &b_electron_superclusterEta);
    fChain->SetBranchAddress("electron_superclusterPhi", electron_superclusterPhi, &b_electron_superclusterPhi);
    fChain->SetBranchAddress("electron_superclusterX", electron_superclusterX, &b_electron_superclusterX);
@@ -1534,7 +1542,7 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("electron_chargedHadIso", electron_chargedHadIso, &b_electron_chargedHadIso);
    fChain->SetBranchAddress("electron_neutralHadIso", electron_neutralHadIso, &b_electron_neutralHadIso);
    fChain->SetBranchAddress("electron_photonIso", electron_photonIso, &b_electron_photonIso);
-   fChain->SetBranchAddress("electron_puIso", electron_puIso, &b_electron_puIso);
+   fChain->SetBranchAddress("electron_relIso", electron_relIso, &b_electron_relIso);
    fChain->SetBranchAddress("electron_r03_sumChargedHadronPt", electron_r03_sumChargedHadronPt, &b_electron_r03_sumChargedHadronPt);
    fChain->SetBranchAddress("electron_r03_sumChargedParticlePt", electron_r03_sumChargedParticlePt, &b_electron_r03_sumChargedParticlePt);
    fChain->SetBranchAddress("electron_r03_sumNeutralHadronEt", electron_r03_sumNeutralHadronEt, &b_electron_r03_sumNeutralHadronEt);
@@ -1929,7 +1937,8 @@ void AC1B::Init(TTree *tree, bool isData)
    fChain->SetBranchAddress("tau_againstMuonLoose3", tau_againstMuonLoose3, &b_tau_againstMuonLoose3);
    fChain->SetBranchAddress("tau_againstMuonTight3", tau_againstMuonTight3, &b_tau_againstMuonTight3);
    fChain->SetBranchAddress("tau_byCombinedIsolationDeltaBetaCorrRaw3Hits", tau_byCombinedIsolationDeltaBetaCorrRaw3Hits, &b_tau_byCombinedIsolationDeltaBetaCorrRaw3Hits);
-   fChain->SetBranchAddress("tau_byIsolationMVArun2v1DBdR03oldDMwLTraw", tau_byIsolationMVArun2v1DBdR03oldDMwLTraw, &b_tau_byIsolationMVArun2v1DBdR03oldDMwLTraw);
+   fChain->SetBranchAddress("tau_byIsolationMVArun2v1Tight", tau_byIsolationMVArun2v1Tight, &b_tau_byIsolationMVArun2v1Tight);
+   fChain->SetBranchAddress("tau_byIsolationMVArun2v1Medium", tau_byIsolationMVArun2v1Medium, &b_tau_byIsolationMVArun2v1Medium);
    fChain->SetBranchAddress("tau_byIsolationMVArun2v1DBnewDMwLTraw", tau_byIsolationMVArun2v1DBnewDMwLTraw, &b_tau_byIsolationMVArun2v1DBnewDMwLTraw);
    fChain->SetBranchAddress("tau_byIsolationMVArun2v1DBoldDMwLTraw", tau_byIsolationMVArun2v1DBoldDMwLTraw, &b_tau_byIsolationMVArun2v1DBoldDMwLTraw);
    fChain->SetBranchAddress("tau_byIsolationMVArun2v1PWdR03oldDMwLTraw", tau_byIsolationMVArun2v1PWdR03oldDMwLTraw, &b_tau_byIsolationMVArun2v1PWdR03oldDMwLTraw);

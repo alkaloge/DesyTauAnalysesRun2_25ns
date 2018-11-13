@@ -5,7 +5,7 @@ systematics="Nominal JetEnUp JetEnDown TopPtUp TopPtDown ZPtUp ZPtDown TauEnUp T
 systematics="Nominal JetEnUp JetEnDown TopPtUp TopPtDown ZPtUp ZPtDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown ScalesDown ScalesUp PDFUp PDFDown METUp METDown BTagUp BTagDown EWKUp EWKDown METRecoilUp METRecoilDown"
 
 
-systematics="Nominal"
+systematics="Nominal JetEnUp JetEnDown JetResUp JetResDown"
 
 region="SR_CR1"
 

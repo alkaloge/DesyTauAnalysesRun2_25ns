@@ -207,30 +207,30 @@ TH1::SetDefaultSumw2();
 	variables.push_back("met_MTDil2_16");
 	variables.push_back("met_Smin_17");
 	*/
-	variables.push_back("met_MTDil");
-	variables.push_back("met_MTDil2");
+	variables.push_back("met_MTDil4");
+/*	variables.push_back("met_MTDil2");
 	variables.push_back("met_MTDil3");
 	variables.push_back("met_MTDil4");
 	variables.push_back("met_MTDil5");
 	variables.push_back("met_MTDil6");
 	variables.push_back("met_MTDil7");
 	variables.push_back("met_MTDil8");
-	
-	variables.push_back("hmet_dzetaRFB");
-	variables.push_back("met_MTtot");
+*/	
+//	variables.push_back("hmet_dzetaRFB");
+//	variables.push_back("met_MTtot");
 
 	syst_= syst.c_str();
 	
 	vector <string> cuts;
 //	cuts.push_back("_8");
 	cuts.push_back("_9");
-	cuts.push_back("_10");
+/*	cuts.push_back("_10");
 	cuts.push_back("_11");
 	cuts.push_back("_12");
 	cuts.push_back("_13");
 	cuts.push_back("_14");
 	cuts.push_back("_15");
-
+*/
 	char varr[100];
 	for (int vr=0;vr<variables.size();vr++){
 
@@ -378,6 +378,9 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 
 
 				float nGenn = eventCountt->GetSumOfWeights();
+
+
+
 				float normm = float(xsecc*Lumi) / float(nGenn)  ;
 				if (std::string::npos != fname.find("DataDriven")) normm=1.;
 
@@ -394,6 +397,14 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 
 					h2 = (TH1D*) key2->ReadObj ();
 					ModifyHist (h2, cl,Lumi,lumiweights[cl-1],titles[cl-1],norm_);
+					bool bExtrapolate = true;
+					float Lnew=4500000;
+					if (bExtrapolate) 
+					{	float Lcur = nGenn/xsecc;
+						for (int nbb=1; nbb<h2->GetNbinsX()+1;nbb++) h2->SetBinError(nbb, h2->GetBinError(nbb)*sqrt(Lcur/Lnew));
+					}
+
+			//cout<<" again "<<fname<<eventCountt->GetEntries()<<"  "<<xsecc<<"  "<<float(eventCountt->GetEntries()/xsecc)<<endl;
 					h2->SetStats(0);
 					hh[cl] = h2;
 
@@ -445,7 +456,7 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 
 			    if (std::string::npos != title_.find("W0JetsToLNu") || std::string::npos != title_.find("W1JetsToLNu") || std::string::npos != title_.find("W2JetsToLNu")
                         || std::string::npos != title_.find("W3JetsToLNu") || std::string::npos != title_.find("W4JetsToLNu"))  { col=mycolorwjet ; hwj->Add(h2); hwj->SetLineColor(col);}
-                        if (std::string::npos != title_.find("TT_TuneCUETP8M2T4_14TeV-powheg-pythia8") || std::string::npos != title_.find("TTPow")) { col= mycolortt;htt->Add(h2); htt->SetLineColor(col) ;}
+                        if (std::string::npos != title_.find("TT_TuneCUETP8M2T4_14TeV-powheg-pythia8") || std::string::npos != title_.find("DiLept")) { col= mycolortt;htt->Add(h2); htt->SetLineColor(col) ;}
                         if (std::string::npos != title_.find("QCD"))  {col= mycolorqcd; hqcd->Add(h2); hqcd->SetLineColor(col); }
                         if (std::string::npos != title_.find("DYJets") || std::string::npos != title_.find("DYToLL") || std::string::npos != title_.find("MLL-50") )  {col= mycolordyj;hdyj->Add(h2); hdyj->SetLineColor(col);}
                         if (std::string::npos != title_.find("isZTT") ){col= mycolorztt;hztt->Add(h2); hztt->SetLineColor(col);}
@@ -512,7 +523,7 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 				//if (MaxEventsBin<10000) lumistring = lumistring+"_"+str+"MaxEvntsBin_";
 				if (syst!="Nominal") smFilename =  region+"/Templ_"+variable+"_"+lumistring+"_mm_Stop_"+region+"_"+syst+".root";
 					else smFilename =  region+"/Templ_"+variable+"_"+lumistring+"_mm_Stop_"+region+".root";
-
+				TString variableB = variable;
 				if (syst!="Nominal") 
 					variable=variable+"_"+syst;
 
@@ -542,12 +553,12 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 				CheckHist(all_);
 				//CheckHistZero(all_);
 				ofstream tfile;
-				TString textfilename ="bins_2S_"+variable;
+				TString textfilename ="bins_"+variableB;
 				vector <int> keep_bin;keep_bin.clear();
 				vector <string> label_bin;label_bin.clear();
 			 if (syst=="Nominall"){
 				tfile.open(textfilename);
-				//tfile.open("bins_2S_"+region);
+				//tfile.open("bins_"+region);
 				for (int nb=1;nb<=all_->GetNbinsX();++nb){
 
 				float bc_ = all_->GetBinContent(nb);
@@ -567,9 +578,10 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 
 				else SelEvents=false;
 				SelEvents=true;
-
+				
+				cout<<" isSelected " <<SelEvents<<" "<<bc_<<endl;
 				if (SelEvents && bc_>0.001) {
-			//		cout<<" will keep this bin "<<nb<<"  "<<all_->GetBinContent(nb)<<"  "<<keep_bin.size()<<" for Region  "<<region<<endl;
+					cout<<" will keep this bin "<<nb<<"  "<<all_->GetBinContent(nb)<<"  "<<keep_bin.size()<<" for Region  "<<region<<endl;
 					keep_bin.push_back(nb);
 					stringstream ss;
 					ss << nb;
@@ -581,11 +593,11 @@ Impose (TList * sourcelist, string & np_title_, vector<string> titles,vector<flo
 				tfile.close();
 			 }
 
-				TString textfilenameIn ="bins_2S_"+variable;
+				TString textfilenameIn ="bins_"+variableB;
 				
 			 if (syst!="Nominall"){
 				 ifstream ifs(textfilenameIn);
-				
+					
 				 string line; string blabel;
 			        while(std::getline(ifs, line)) // read one line from ifs
         				{
@@ -955,6 +967,8 @@ ModifyHist (TH1D* &h, int cl_ ,float & lumi,float & weight,string & title_, bool
 			//	cout<<" before scaling  ================================ "<<h->GetBinContent(6)<<"  "<<h->GetBinError(6)<<"  "<<weight<<endl;
 	h->Scale(weight);
 			//	cout<<" after scaling  ================================ "<<h->GetBinContent(6)<<"  "<<h->GetBinError(6)<<"  "<<h->GetNbinsX()<<endl;
+			
+
 	int col=cl_;
 
 			if (std::string::npos != title_.find("Data") || std::string::npos != title_.find("Single") || std::string::npos != title_.find("MuonEG")  )  {
@@ -984,7 +998,7 @@ ModifyHist (TH1D* &h, int cl_ ,float & lumi,float & weight,string & title_, bool
 
 
 			if (std::string::npos != title_.find("JetsToLNu") && std::string::npos == title_.find("TTWJetsToLNu"))  { col=mycolorwjet ;}
-			if (std::string::npos != title_.find("TT_TuneCUETP8M2T4_13TeV-powheg-pythia8") || std::string::npos != title_.find("TTPow")) { col= mycolortt; }
+			if (std::string::npos != title_.find("TT_TuneCUETP8M2T4_13TeV-powheg-pythia8") || std::string::npos != title_.find("DiLept")) { col= mycolortt; }
 			if (std::string::npos != title_.find("DataDriven") || std::string::npos != title_.find("QCD"))  {col= mycolorfakes; h->SetEntries(h->GetSumOfWeights());}
 
 			if (std::string::npos != title_.find("JetsToLL") && std::string::npos == title_.find("isZTT"))  {col= mycolordyj;}

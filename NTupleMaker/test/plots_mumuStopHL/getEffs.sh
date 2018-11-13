@@ -1,7 +1,7 @@
 
 models="Stop"
 
-channel="mutau"
+channel="mumu"
 
 for model in $models
 do

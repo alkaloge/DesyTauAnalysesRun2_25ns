@@ -340,7 +340,7 @@ bool WithInit = false;
 	if (fabs(analysisTree.electron_charge[ie]) !=1) continue;
 
 	float relIso=analysisTree.electron_relIso[ie];
-	if (relIso>0.3) continue;
+	if (relIso>0.2) continue;
 
 	  electrons.push_back((int)ie);
 	  isoElectrons.push_back(ie);
@@ -501,7 +501,7 @@ bool WithInit = false;
 	jet_eta[jj] = analysisTree.pfjet_eta[jj];
 	jet_phi[jj] = analysisTree.pfjet_phi[jj];
 	jet_flavour[jj] = analysisTree.pfjet_flavour[jj];
-	jet_btag[jj] = analysisTree.pfjet_btag[jj][0];
+	jet_btag[jj] = analysisTree.pfjet_btag[jj][1];
       }
 
 

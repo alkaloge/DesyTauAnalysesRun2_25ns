@@ -331,7 +331,7 @@ bool WithInit = false;
         if ( fabs(analysisTree.muon_charge[im]) != 1) continue;
 
 	float relIso = analysisTree.muon_relIso[im];	
-	  if (relIso>0.3) continue;
+	  if (relIso>0.2) continue;
 	
 	  muons.push_back((int)im);
 	  isoMuons.push_back((int)im);
@@ -501,7 +501,7 @@ bool WithInit = false;
 	jet_eta[jj] = analysisTree.pfjet_eta[jj];
 	jet_phi[jj] = analysisTree.pfjet_phi[jj];
 	jet_flavour[jj] = analysisTree.pfjet_flavour[jj];
-	jet_btag[jj] = analysisTree.pfjet_btag[jj][0];
+	jet_btag[jj] = analysisTree.pfjet_btag[jj][1];
       }
 
 

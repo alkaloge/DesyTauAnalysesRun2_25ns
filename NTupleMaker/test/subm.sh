@@ -81,6 +81,10 @@ if [[ $3 == "BTag" ]] ; then
 systematics="BTagUp BTagDown"
 fi
 
+if [[  $3 == "HLLHC" ]] ;then
+systematics="Nominal JetEnUp JetEnDown  JetResUp JetResDown"
+fi
+
 cd /afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test
 wdir=/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test
 while read line

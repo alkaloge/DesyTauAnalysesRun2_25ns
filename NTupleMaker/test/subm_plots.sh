@@ -43,6 +43,9 @@ if [[  $3 == "listTFR" ]] ;then
 systematics="TFRJetEnUp TFRJetEnDown TFRMuEnUp TFRMuEnDown TFRTauEnUp TFRTauEnDown"
 fi
 
+if [[  $3 == "HLLHC" ]] ;then
+systematics="Nominal JetEnUp JetEnDown  JetResUp JetResDown"
+fi
 
 
 if [[  $3 == "listTT" ]] ;then
@@ -119,11 +122,11 @@ whichcut=$4
 		sed -i 's@arguments@arguments = list_'${lt}' '$2' '${syst}' '${shichcut}'@' subm_plots_${syst}_${2}.sub
 	#        condor_submit subm_plots_${syst}_${2}.sub
 	
-	if [[ $lt != *"DY"* ]] && [[ $lt != *"TT_"* ]]; then
+	if [[ $lt != *"DY"* ]] && [[ $lt != *"TT"* ]]; then
 	 	bsub -R "rusage[mem=2048:pool=2000]"  -q 1nh  -J plots_${syst}_$2 -i /dev/null -o /dev/null -e /dev/null run_plots_new.sh list_$lt $2 $syst $whichcut
 	else
 	#if [[ $lt == *"DY"* ]] || [[ $lt == *"TT_"* ]]; then
-	 	bsub -R "rusage[mem=2048:pool=2000]"  -q 8nh  -J plots_${syst}_$2 -i /dev/null -o /dev/null -e /dev/null run_plots_new.sh list_$lt $2 $syst $whichcut
+	 	bsub -R "rusage[mem=4048:pool=3000]"  -q 8nh  -J plots_${syst}_$2 -i /dev/null -o /dev/null -e /dev/null run_plots_new.sh list_$lt $2 $syst $whichcut
 	fi
 
 	fi

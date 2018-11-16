@@ -59,12 +59,9 @@ void analyzer::Loop(){
 	CutList.push_back("MET>80");
 	CutList.push_back("DR<3");
 	CutList.push_back("JetsCuts");
-	CutList.push_back("HToMET");
-	CutList.push_back("MeffLepton");
-	CutList.push_back("dEtaj<4_HTOMET<5");
-	CutList.push_back("MeffLeptons");
+	CutList.push_back("Extra1");
+	CutList.push_back("Extra2");
 	CutList.push_back("Extra3");
-	CutList.push_back("Extra4");
 
 
 	string channel = "mumu";
@@ -176,17 +173,22 @@ void analyzer::Loop(){
         TFile * fCorr = new TFile("/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/HL-Optimistic.root","read");
 
         TH1F  * JES   = (TH1F*) fCorr->FindObjectAny("TOTAL_DIJET_AntiKt4EMTopo;1");
-        //TH1F  * JESBTag   = (TH1F*) fCorr->FindObjectAny("BJES_Response_AntiKt4EMTopo;1");
+        TH1F  * JESBTag   = (TH1F*) fCorr->FindObjectAny("TOTAL_BJES_AntiKt4EMTopo;1");
+
 	TH1F  * JER   = (TH1F*) fCorr->FindObjectAny("Flavor_Response_DIJET_AntiKt4EMTopo;1");
+        TH1F  * JERBTag   = (TH1F*) fCorr->FindObjectAny("BJES_Response_AntiKt4EMTopo;1");
 
 	
 	if (isSignal) cout<<" YOU HAVE FOUND ITTTTTTTTT is it signal ???  "<<isSignal<<" systematic "<<systematic<<endl;
 	if (isData) cout<<" YOU HAVE FOUND a DATA "<<endl;
 
+	cout<<" Check on Systematics  "<<JES->Integral()<<"  "<<JESBTag->Integral()<<"  "<<JER->Integral()<<"  "<<JERBTag->Integral()<<"  "<<systematic<<endl;
 
-	TString fileinName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL/FILEIN";
+
+	TString fileinName = "/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE/FILEIN";
 	//if (systematic == "JetEnUp" || systematic == "JetEnDown"  || systematic == "UnclEnDown" || systematic == "UnclEnDown" || systematic == "TauEnUp" || systematic == "TauEnDown" || systematic == "ElEnUp" || systematic == "ElEnDown" || systematic == "MuEnUp" || systematic == "MuEnDown" || systematic == "BTagUp" || systematic == "BTagDown") 
-	//{fileinName ="/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/muelStopHL_"+systematic+"/FILEIN";}
+	//{fileinName ="/afs/cern.ch/user/a/alkaloge/work/HLLHC/CMSSW_8_0_29/src/DesyTauAnalyses/NTupleMaker/test/CHANNELHERE_"+systematic+"/FILEIN";}
+	cout<<" Will work with FILEIN and "<<systematic<<endl;
 
 
 	TFile * filein = new TFile(fileinName,"read");
@@ -335,13 +337,15 @@ if (systematic == "JetEnUp" )
         for (int nj=0;nj<njets;++nj) {
         int jet_index = jets_cleaned[nj];
         JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JES->GetBinContent(JES->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
+if (jet_btag[jet_index]<0.5)        JetsV.SetPxPyPzE( jet_px[jet_index]*(1+JES->GetBinContent(JES->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1+JES->GetBinContent(JES->FindBin(jet_py[jet_index]))),    jet_pz[jet_index],jet_e[jet_index]);
+else       JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JESBTag->GetBinContent(JESBTag->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1+JESBTag->GetBinContent(JESBTag->FindBin(jet_py[jet_index]))), jet_pz[jet_index],jet_e[jet_index]);
+
         JetsMV.push_back(JetsV);
         }
 
                 METV.SetPx(met_ex*(1+0.005));
                 METV.SetPy(met_ey*(1+0.005));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
+                met= sqrt(met_ex*met_ex + met_ey*met_ey)*(1+0.005);
 
 }
 
@@ -354,18 +358,19 @@ if (systematic == "JetEnDown" )
         for (int nj=0;nj<njets;++nj) {
         int jet_index = jets_cleaned[nj];
         JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JES->GetBinContent(JES->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
+if (jet_btag[jet_index]<0.5)        JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JES->GetBinContent(JES->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1-JES->GetBinContent(JES->FindBin(jet_py[jet_index]))),    jet_pz[jet_index],jet_e[jet_index]);
+else       JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JESBTag->GetBinContent(JESBTag->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1-JESBTag->GetBinContent(JESBTag->FindBin(jet_py[jet_index]))), jet_pz[jet_index],jet_e[jet_index]);
         JetsMV.push_back(JetsV);
         }
 
                 METV.SetPx(met_ex*(1+0.005));
                 METV.SetPy(met_ey*(1+0.005));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
+                met= sqrt(met_ex*met_ex + met_ey*met_ey)*(1+0.005);
 
 }
 
 
-if (systematic == "JetResDown" && taus_index>-1 )
+if (systematic == "JetResDown" )
 {
 
                 JetsMV.clear();
@@ -373,18 +378,19 @@ if (systematic == "JetResDown" && taus_index>-1 )
         for (int nj=0;nj<njets;++nj) {
         int jet_index = jets_cleaned[nj];
         JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JER->GetBinContent(JER->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
+if(jet_btag[jet_index]<0.5)        JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JER->GetBinContent(JER->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1-JER->GetBinContent(JER->FindBin(jet_py[jet_index]))), jet_pz[jet_index],jet_e[jet_index]);
+else  JetsV.SetPxPyPzE(jet_px[jet_index]*(1-JERBTag->GetBinContent(JERBTag->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1-JERBTag->GetBinContent(JERBTag->FindBin(jet_py[jet_index]))), jet_pz[jet_index],jet_e[jet_index]);
         JetsMV.push_back(JetsV);
         }
 
                 METV.SetPx(met_ex*(1-0.003));
                 METV.SetPy(met_ey*(1-0.003));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
+                met= sqrt(met_ex*met_ex + met_ey*met_ey)*(1+0.003);
 
 }
 
 
-if (systematic == "JetResUp" && taus_index>-1 )
+if (systematic == "JetResUp" )
 {
 
                 JetsMV.clear();
@@ -392,13 +398,14 @@ if (systematic == "JetResUp" && taus_index>-1 )
         for (int nj=0;nj<njets;++nj) {
         int jet_index = jets_cleaned[nj];
         JetsV.SetPxPyPzE(0.,0.,0.,0.);
-        JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JER->GetBinContent(JER->FindBin(jet_px[jet_index]))), jet_py[jet_index],jet_pz[jet_index],jet_e[jet_index]);
+ if (jet_btag[jet_index]<0.5)       JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JER->GetBinContent(JER->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1+JER->GetBinContent(JER->FindBin(jet_py[jet_index]))), jet_pz[jet_index],jet_e[jet_index]);
+ else JetsV.SetPxPyPzE(jet_px[jet_index]*(1+JERBTag->GetBinContent(JERBTag->FindBin(jet_px[jet_index]))), jet_py[jet_index]*(1+JERBTag->GetBinContent(JERBTag->FindBin(jet_py[jet_index]))), jet_pz[jet_index],jet_e[jet_index]);
         JetsMV.push_back(JetsV);
         }
 
                 METV.SetPx(met_ex*(1+0.003));
                 METV.SetPy(met_ey*(1+0.003));
-                met= sqrt(met_ex*met_ex + met_ey*met_ey);
+                met= sqrt(met_ex*met_ex + met_ey*met_ey)*(1+0.003);
 
 }
 
@@ -580,16 +587,11 @@ if (systematic == "JetResUp" && taus_index>-1 )
                 iCFCounter[iCut]++;
 		iCut++;
 
-		if (DoNoCut !=iCut && HTOMET>7) continue;
-		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
+///////////////////////////
 
 		if (DoNoCut !=iCut && MeffHTMETOsqrMET<20) continue;
 		if (DoNoCut !=iCut && MeffHTMETOsqrMET>90) continue;
-		if (DoNoCut !=iCut && MeffLepton<300) continue;
+		if (DoNoCut !=iCut && MeffLepton<200) continue;
 		if (DoNoCut !=iCut &&  fabs(LeptV1.Eta())> 2) continue;
 		if (DoNoCut !=iCut &&  fabs(LeptV1.Pt())> 350) continue;
 		if (DoNoCut !=iCut &&  fabs(LeptV2.Eta())> 2) continue;
@@ -603,48 +605,47 @@ if (systematic == "JetResUp" && taus_index>-1 )
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
 		iCut++;
-//extra1_12	
+
+/////extra1_10
+		if (DoNoCut !=iCut && MeffHTMETOsqrMET<20) continue;
+		if (DoNoCut !=iCut && MeffHTMETOsqrMET>90) continue;
+		if (DoNoCut !=iCut && MeffLepton<200) continue;
+		if (DoNoCut !=iCut &&  fabs(LeptV1.Eta())> 2) continue;
+		if (DoNoCut !=iCut &&  fabs(LeptV1.Pt())> 350) continue;
+		if (DoNoCut !=iCut &&  fabs(LeptV2.Eta())> 2) continue;
+		if (DoNoCut !=iCut &&  fabs(LeptV2.Pt())> 150) continue;
+
+		if (DoNoCut !=iCut &&  fabs(LeptV1.Pt())< 30) continue; //added for ConfC
+		if (DoNoCut !=iCut &&  fabs(LeptV2.Pt())< 30) continue; // aded for ConfCm
+
+		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
+		CFCounter[iCut]+= all_weights;
+		CFCounter_[iCut]+= all_weights;
+                iCFCounter[iCut]++;
+		iCut++;
+//extra2_11	
 		double detaj = -10;
 		if (JetsMV.size()>1) detaj=deltaEta(JetsMV.at(0).Px() ,  JetsMV.at(0).Py() , JetsMV.at(0).Pz() , JetsMV.at(1).Px() ,  JetsMV.at(1).Py() , JetsMV.at(1).Pz());
  	        if (DoNoCut !=iCut && JetsMV.size()>1 && fabs(detaj)>4 ) continue;
-		if (DoNoCut !=iCut && HTOMET>5) continue;
-		//if (JetsMV.size()>1) cout<<fabs(detaj)<<"  "<<fabs(JetsMV.at(0).Eta()-JetsMV.at(1).Eta())<<endl;
-			
+		if (DoNoCut !=iCut && fabs(dEta)>1.5) continue;
+		if (DoNoCut !=iCut && MeffLepton<200) continue;
+		if (DoNoCut !=iCut && MeffLepton>800) continue;
 
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;
 		CFCounter_[iCut]+= all_weights;
                 iCFCounter[iCut]++;
-		iCut++;
-//extra2_13
-	//	if (DiL.M()<105) continue; //confB
-		if (DoNoCut !=iCut && MeffLept1<250) continue;
-		if (DoNoCut !=iCut && MeffLept2<250) continue;
-	//	if (DoNoCut !=iCut && Dr<1) continue;
 
-		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-	
+
 		//MCTb < 200
   	        //double mcta = sqrt( 2* LeptV1.Pt()* LeptV2.Pt()*(1+cos( LeptV1.Phi()- LeptV2.Phi())) );
 		//if (mcta>200) continue;
 		//if (mcta<20) continue;
-//extra3_14
-		if (DoNoCut !=iCut && MTl1<40) continue;
-		if (DoNoCut !=iCut && MTl2<40) continue;
-		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
-		CFCounter[iCut]+= all_weights;
-		CFCounter_[iCut]+= all_weights;
-                iCFCounter[iCut]++;
-		iCut++;
-//extra4_15
-	//	if (DoNoCut !=iCut && met<80) continue;
-		if (DoNoCut !=iCut && met>350) continue;
+//extra3_12
+		if (DoNoCut !=iCut && MTl1<80) continue;
+		if (DoNoCut !=iCut && MTl2<80) continue;
 		if (DoNoCut !=iCut && HTOMET>4) continue;
-		if (DiL.Pt() < 30 && DiL.Pt()>200) continue;
+		if (DiL.Pt() < 30 && DiL.Pt()>300) continue;
 
 		FillHistsDiL(iCut, all_weights, LeptV1, LeptV2, LeptV3, JetsMV, METV, channel, l1_index,l2_index,l3_index);
 		CFCounter[iCut]+= all_weights;

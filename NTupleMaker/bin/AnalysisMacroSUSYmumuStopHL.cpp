@@ -538,7 +538,9 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
       float bJetEtaCut = jetEta;
 
       vector<unsigned int> jets; jets.clear();
-      vector<unsigned int> bjets; bjets.clear();
+      vector<unsigned int> bjetsL; bjetsL.clear();
+      vector<unsigned int> bjetsT; bjetsT.clear();
+      vector<unsigned int> bjetsM; bjetsM.clear();
 
       int indexLeadingJet = -1;
       float ptLeadingJet = -1;
@@ -581,10 +583,9 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
 
 	if (absJetEta<bJetEtaCut) { // jet within b-tagging acceptance
 
-	if (analysisTree.pfjet_btag[jet][0]  > bTag) btagged = true;
-	
-
-	  if (btagged && cleanedJet) bjets.push_back(jet);
+	if (analysisTree.pfjet_btag[jet][0]  > 0.5) bjetsL.push_back(jet);
+	if (analysisTree.pfjet_btag[jet][1]  > 0.5) bjetsM.push_back(jet);
+	if (analysisTree.pfjet_btag[jet][2]  > 0.5) bjetsT.push_back(jet);
 	}
 
 
@@ -602,7 +603,10 @@ if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
 
       njets = jets.size();
       jet_count = jets.size();
-      nbtag = bjets.size();
+      nbtag = bjetsM.size();
+      nbtagL = bjetsL.size();
+      nbtagM = bjetsM.size();
+      nbtagT = bjetsT.size();
 
 
       met_ex = analysisTree.pfmet_pt*TMath::Cos(analysisTree.pfmet_phi);

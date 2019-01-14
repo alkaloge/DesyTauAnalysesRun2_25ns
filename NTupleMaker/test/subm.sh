@@ -3,11 +3,6 @@
 systematics="JetEnUp JetEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown"
 
 systematics="Nominal"
-systematics="JetEnUp JetEnDown UnclEnUp UnclEnDown"
-systematics="TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown"
-#systematics="MuEnUp MuEnDown"
-systematics="Nominal JetEnUp JetEnDown UnclEnUp UnclEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown"
-systematics="Nominal JetEnUp JetEnDown UnclEnUp UnclEnDown"
 
 unset systematics
 
@@ -59,6 +54,28 @@ if [[ $3 == "lept" ]] ; then
 systematics="TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown"
 fi
 
+if [[ $3 == "el" ]] ; then
+
+#systematics="UnclEnUp UnclEnDown"
+systematics="ElEnUp ElEnDown"
+fi
+
+
+if [[ $3 == "mu" ]] ; then
+
+#systematics="UnclEnUp UnclEnDown"
+systematics="MuEnUp MuEnDown"
+fi
+
+
+
+if [[ $3 == "tau" ]] ; then
+
+#systematics="UnclEnUp UnclEnDown"
+systematics="TauEnUp TauEnDown"
+fi
+
+
 if [[ $3 == "BTag" ]] ; then
 
 systematics="BTagUp BTagDown"
@@ -68,8 +85,8 @@ cd /nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/New8025/CMSSW_8_
 while read line
 do
 
-lt=`echo $line`
-echo $line > $lt
+lt=`echo ${line}`
+echo ${line} > $lt
 
 for syst in $systematics
 do
@@ -77,11 +94,17 @@ do
 
 
 
-	#echo $line > dt
+	#echo ${line} > dt
 	
-	echo submitting  run_mc.sh $line for $2 channel and systematic = $syst
+	echo submitting  run_mc.sh ${line} for $2 channel and systematic = $syst
+	chmod 777 run_mc2.sh
 	
-			qsub  -l h_vmem=3000M -l h_cpu=2:59:00 run_mc2.sh $line $2 $syst  
+	cp submit_template.submit subm_${line}.submit
+	sed -i 's/EXECHERE/run_mc2.sh/g' subm_${line}.submit
+	sed -i 's@arguments@arguments = '${line}' '$2' '${syst}'@' subm_${line}.submit
+	condor_submit subm_${line}.submit
+
+	#qsub  -l h_vmem=3000M -l h_cpu=2:59:00 run_mc2.sh ${line} $2 $syst  
 
 done
 done<$1

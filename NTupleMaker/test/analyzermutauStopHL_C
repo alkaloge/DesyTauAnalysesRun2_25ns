@@ -61,9 +61,7 @@ cout <<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAa" <<endl;
 	CutList.push_back("invM>100");
 	CutList.push_back("MTsum>120");
 
-	//ChiMass = 0;
 	ChiMass = 0.;
-	//cout<<" THE MASS IS ========================= "<<ChiMass<<endl;
 	 int CutNumb = int(CutList.size());
          int iCFCounter[CutNumb];
 	 double CFCounter[CutNumb];

@@ -1,0 +1,37 @@
+#executable          = /nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/New8025/CMSSW_8_0_25/src/DesyTauAnalyses/NTupleMaker/test/EXECHERE
+executable          = EXECHERE
+# # switch to either transfer the executable per job to the node
+# # or from the shared storage for all jobs (don't touch during your job upstart!)
+arguments 
+transfer_executable = True
+transfer_input_files 
+universe            = vanilla
+#input               = /nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/New8025/CMSSW_8_0_25/src/DesyTauAnalyses/NTupleMaker/test/mypayload.data
+output              = output/mypayload_$(Process).out
+error               = error/mypayload_$(Process).error
+log                 = log/mypayload_$(Process).log
+
+should_transfer_files   = IF_NEEDED
+when_to_transfer_output = ON_EXIT
+##########################
+# job requirements       #
+# special requirements as nly nodes with specific linux flavours
+# e.g., requesting a node, that runs either with ScientificLinuc 6 or with CentOS 7
+#
+requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
+#
+# maximum memory in MB; a job gets killed by the system when exceeding the request and the node has no spare memory
+# default is 1536M and jobs requesting > 2048 get more hit in the fairshare calculation
+#
+RequestMemory = 2048
+
+#
+# max run time in seconds for a job, after it gets killed by the system
+# if not set, default is 3 hours
+# longer requested job run times get more hit in the fairshare calculation
+#
++RequestRuntime     = 1800
+#
+#
+##########################
+queue

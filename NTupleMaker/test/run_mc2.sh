@@ -22,7 +22,7 @@
 #$ -V
 #
 
-cd /nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/New8025/CMSSW_8_0_25/src/DesyTauAnalyses/NTupleMaker/test;eval `scramv1 runtime -sh` ;
+cd /nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/New8025/CMSSW_8_0_25/src/DesyTauAnalyses/NTupleMaker/test/;eval `scramv1 runtime -sh` ;cmsenv;eval `scram runtime -sh`;
 
 
 wdir="/nfs/dust/cms/user/alkaloge/TauAnalysis/new/new/StauAnalysis/New8025/CMSSW_8_0_25/src/DesyTauAnalyses/NTupleMaker/test"
@@ -38,7 +38,7 @@ systematics="$3"
 if [[ $3 == "all" || $3 == "All"  || $3 == "list" ]];then
 #systematics="Nominal JetEnUp JetEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown"
 systematics="Nominal JetEnUp JetEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown BTagUp BTagDown"
-#systematics="Nominal JetEnUp JetEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown BTagUp BTagDown"
+#systematics="JetEnUp JetEnDown TauEnUp TauEnDown ElEnUp ElEnDown MuEnUp MuEnDown UnclEnUp UnclEnDown BTagUp BTagDown"
 #systematics="JetEnUp JetEnDown UnclEnUp UnclEnDown"
 
 fi
@@ -65,7 +65,7 @@ fi
 while read line
 do
 
-if [[ $line != *"C1"* ]] ; then
+if [[ $line != *"C1"*  && $line != *"stau"*  && $line != *"Chi"* ]] ; then
 ct=`ls ${dir}/${line}_[0-9]*_B_OS.root | wc -l`
 
 else
@@ -77,7 +77,7 @@ fi
 ctt=`cat ${dir}/${line} | wc -l`
 
 
-echo There are  $ct out of $ctt for $line in $dir dir for systematic $syst
+echo There are  $ct out of $ctt for $line in ${dir} dir for systematic $syst
 
 if [[ $ct -ge $ctt ]] ;then
 	continue;
@@ -95,34 +95,50 @@ while read f
 unset bas
 bas=`basename $f | awk -F ".root" '{print $1}'`
 
-if [ ! -f $dir/$bas.root ] 
+if [ ! -f ${dir}/$bas.root ] 
 then
-echo $f > $dir/$bas
+echo $f > ${dir}/$bas
 
 #	echo " "$bas $xsec >> xsecs
 
 
-	if [ -f Jobs/job${channel}${line}$dir${bas}_B${syst}.sh ] ; then
-rm Jobs/job${channel}${line}$dir${bas}_B${syst}.sh
+	if [ -f Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh ] ; then
+rm Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh
 fi
 
 
-cat bss > Jobs/job${channel}${line}$dir${bas}_B${syst}.sh
+cat bss > Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh
 
 
 
 
 if [ ! -f ${dir}/${bas}_B_OS.root ] ;then
 
-echo $bas $xsec $dir
-echo SUSY$channel analysisMacroSUSY_${type}_B.conf ${bas} ${channel} 1 $syst>> Jobs/job${channel}${line}$dir${bas}_B${syst}.sh
-chmod u+x $wdir/Jobs/job${channel}${line}$dir${bas}_B${syst}.sh
- qsub -l h_rt=1:45:00 -l h_cpu=3500M -e /dev/null -o /dev/null $wdir/Jobs/job${channel}${line}$dir${bas}_B${syst}.sh 
+echo $bas $xsec ${dir}
+
+if [[ $channel == "HZZmumu" ]] ; then 
+echo $channel analysisMacroSUSY_${type}_B.conf ${bas} ${channel} 1 $syst>> Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh
+
+fi
+if [[ $channel != "HZZmumu" ]] ; then 
+
+	echo SUSY$channel analysisMacroSUSY_${type}_B.conf ${bas} ${channel} 1 $syst>> Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh
+
+fi
+	cp submit_template.submit subm_run${line}.submit
+	sed -i 's@EXECHERE@Jobs/job'${channel}'_'${line}'_'${dir}'_'${bas}'_B'${syst}'.sh@g' subm_run${line}.submit
+	sed -i '/argument/d' subm_run${line}.submit
+	chmod u+x $wdir/Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh
+	condor_submit subm_run${line}.submit
+
+
+# qsub -l h_rt=0:30:00 -l h_cpu=1500M -e /dev/null -o /dev/null $wdir/Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh 
+ #. $wdir/Jobs/job${channel}_${line}_${dir}_${bas}_B${syst}.sh 
 fi
 
 
 fi
 
-done<$dir/${line}
+done<${dir}/${line}
 done<$1
 done
